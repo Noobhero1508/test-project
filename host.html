@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Host Control — Global Agent Mission</title>
+  <meta name="description" content="Host control panel for the Global Agent Mission game.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="host-container">
+  <!-- Header -->
+  <div class="host-header">
+    <h1>🌐 GLOBAL AGENT MISSION</h1>
+    <div class="host-status">
+      <span class="status-dot" id="host-status-dot"></span>
+      <span id="host-status-text">WAITING</span>
+    </div>
+  </div>
+
+  <!-- ═══ LOBBY ═══ -->
+  <div id="host-lobby" class="host-lobby">
+    <h2>Mission Control</h2>
+    <p class="player-count"><span id="player-count">0</span> agents connected</p>
+    <div class="host-player-grid" id="host-player-grid"></div>
+    <button class="btn-primary" id="host-start-btn" onclick="hostStartGame()">START MISSION</button>
+  </div>
+
+  <!-- ═══ GAME PANEL ═══ -->
+  <div id="host-game" class="hidden">
+    <div class="host-game-panel">
+      <!-- Left: Current Question -->
+      <div class="host-q-panel">
+        <h3>CURRENT QUESTION</h3>
+        <p style="font-size:10px;color:var(--muted);margin-bottom:8px" id="host-q-meta"></p>
+        <p class="host-q-text" id="host-q-text"></p>
+        <div class="host-q-answer" id="host-q-answer"></div>
+        <div class="host-q-stats" id="host-q-stats"></div>
+        <div class="host-controls" style="margin-top:16px">
+          <button class="btn-primary" id="host-next-btn" onclick="hostNextQuestion()">NEXT QUESTION →</button>
+          <button class="btn-secondary" id="host-reveal-btn" onclick="hostRevealAnswer()">REVEAL ANSWER</button>
+        </div>
+      </div>
+      <!-- Right: Leaderboard -->
+      <div class="host-lb-panel">
+        <h3>LIVE LEADERBOARD</h3>
+        <ol class="host-lb-list" id="host-lb-list"></ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TEAM SELECTION (Round 3) ═══ -->
+  <div id="host-team-selection" class="hidden" style="text-align:center;padding:40px 20px">
+    <h2 style="color:#d4a017;letter-spacing:2px;margin-bottom:8px">⚖️ TEAM SELECTION</h2>
+    <p style="color:var(--muted);margin-bottom:24px">Players are choosing their teams for the Globalization Debate</p>
+    <div style="display:flex;justify-content:center;gap:40px;margin-bottom:24px">
+      <div style="text-align:center">
+        <div style="font-size:48px">🌐</div>
+        <div style="color:#4caf50;font-size:14px;font-weight:600;letter-spacing:1px">PRO</div>
+        <div style="font-size:36px;font-weight:700;color:#4caf50" id="host-pro-count">0</div>
+        <div style="color:var(--muted);font-size:12px">agents</div>
+      </div>
+      <div style="display:flex;align-items:center;color:#d4a017;font-size:20px;font-weight:700">VS</div>
+      <div style="text-align:center">
+        <div style="font-size:48px">🛡️</div>
+        <div style="color:#f44336;font-size:14px;font-weight:600;letter-spacing:1px">ANTI</div>
+        <div style="font-size:36px;font-weight:700;color:#f44336" id="host-anti-count">0</div>
+        <div style="color:var(--muted);font-size:12px">agents</div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="hostStartRound3()" style="background:#d4a017">START ROUND 3 →</button>
+  </div>
+
+  <!-- ═══ TEAM RESULTS (after Round 3) ═══ -->
+  <div id="host-team-results" class="hidden" style="text-align:center;padding:40px 20px">
+    <h2 style="color:#d4a017;letter-spacing:2px;margin-bottom:8px">🏆 DEBATE RESULTS</h2>
+    <p style="color:var(--muted);margin-bottom:24px" id="host-tr-subtitle"></p>
+    <div style="display:flex;justify-content:center;gap:40px;margin-bottom:16px">
+      <div style="text-align:center">
+        <div style="font-size:48px">🌐</div>
+        <div style="color:#4caf50;font-size:14px;font-weight:600">PRO</div>
+        <div style="font-size:36px;font-weight:700;color:#4caf50" id="host-tr-pro-score">0</div>
+        <div style="color:var(--muted);font-size:12px" id="host-tr-pro-members">0 agents</div>
+      </div>
+      <div style="display:flex;align-items:center;color:#d4a017;font-size:20px;font-weight:700">VS</div>
+      <div style="text-align:center">
+        <div style="font-size:48px">🛡️</div>
+        <div style="color:#f44336;font-size:14px;font-weight:600">ANTI</div>
+        <div style="font-size:36px;font-weight:700;color:#f44336" id="host-tr-anti-score">0</div>
+        <div style="color:var(--muted);font-size:12px" id="host-tr-anti-members">0 agents</div>
+      </div>
+    </div>
+    <div style="max-width:400px;margin:0 auto 24px">
+      <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;background:#2a1f14">
+        <div id="host-tr-inf-pro" style="background:#4caf50;width:50%;transition:width 0.6s;border-radius:6px 0 0 6px"></div>
+        <div id="host-tr-inf-anti" style="background:#f44336;width:50%;transition:width 0.6s;border-radius:0 6px 6px 0"></div>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:20px">🎁 Phát thưởng cho team thắng xong thì bấm tiếp tục</p>
+    <button class="btn-primary" onclick="hostContinueAfterTeam()" style="background:#d4a017">CONTINUE TO ROUND 4 →</button>
+  </div>
+
+  <!-- ═══ FUN FACT ═══ -->
+  <div id="host-funfact" class="host-funfact-panel hidden">
+    <h2>💡 DID YOU KNOW?</h2>
+    <p class="funfact-text" id="host-funfact-text"></p>
+    <button class="btn-primary" onclick="hostNextRound()">CONTINUE TO NEXT ROUND →</button>
+  </div>
+
+  <!-- ═══ FINAL ═══ -->
+  <div id="host-final" class="host-final hidden">
+    <h2>🏆 MISSION COMPLETE</h2>
+    <div class="podium" id="host-podium"></div>
+    <div class="host-full-ranking" id="host-ranking"></div>
+    <div class="host-class-stats" id="host-class-stats"></div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="questions.js"></script>
+<script src="host.js"></script>
+</body>
+</html>
