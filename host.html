@@ -6,6 +6,153 @@
   <title>Host Control — Global Agent Mission</title>
   <meta name="description" content="Host control panel for the Global Agent Mission game.">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Host-specific overrides ── */
+    .host-q-display { display:flex; flex-direction:column; gap:12px; }
+    .host-mcq-grid  { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; }
+    .host-opt-btn   {
+      background:#1a1a2e; border:2px solid rgba(255,255,255,0.12);
+      border-radius:10px; padding:12px 16px; color:#fff; font-size:14px;
+      font-family:var(--mono,monospace); cursor:default; display:flex;
+      align-items:center; gap:10px; transition:all .3s; text-align:left;
+    }
+    .host-opt-btn .opt-letter {
+      width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,0.1);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; font-size:13px; flex-shrink:0;
+    }
+    .host-opt-btn.revealed-correct {
+      background:rgba(76,175,80,0.25); border-color:#4caf50;
+    }
+    .host-opt-btn.revealed-correct .opt-letter { background:#4caf50; }
+
+    /* Fill-in host display */
+    .host-fillin-display {
+      background:#111; border:2px solid rgba(255,255,255,0.1);
+      border-radius:10px; padding:16px; font-size:15px; color:#ccc;
+      line-height:1.8; margin-top:8px;
+    }
+    .host-fi-blank {
+      display:inline-block; min-width:120px; border-bottom:2px solid var(--accent,#cc0000);
+      margin:0 6px; text-align:center; color:transparent;
+      font-weight:700; font-size:15px; transition:all .4s;
+    }
+    .host-fi-blank.revealed {
+      color:#4caf50; border-color:#4caf50;
+    }
+
+    /* ── Round 3 Battle View ── */
+    #host-round3-battle {
+      display:flex; flex-direction:column; gap:0; height:calc(100vh - 80px);
+    }
+    .r3-battle-top {
+      padding:16px 20px 10px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .r3-battle-header {
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:12px;
+    }
+    .r3-battle-title {
+      font-size:14px; font-weight:700; letter-spacing:2px;
+      color:#d4a017; text-transform:uppercase;
+    }
+    .r3-q-counter { font-size:12px; color:var(--muted,#888); }
+
+    /* Battle bar */
+    .r3-score-row {
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:6px;
+    }
+    .r3-score-pro { font-size:22px; font-weight:800; color:#4caf50; }
+    .r3-score-anti { font-size:22px; font-weight:800; color:#f44336; }
+    .r3-vs-label { font-size:13px; color:#d4a017; font-weight:700; }
+    .r3-influence-bar {
+      display:flex; height:18px; border-radius:9px; overflow:hidden;
+      background:#2a1f14; position:relative;
+    }
+    .r3-inf-pro {
+      background:linear-gradient(90deg,#388e3c,#4caf50);
+      transition:width 0.6s cubic-bezier(.4,0,.2,1);
+      border-radius:9px 0 0 9px;
+    }
+    .r3-inf-anti {
+      background:linear-gradient(90deg,#f44336,#b71c1c);
+      transition:width 0.6s cubic-bezier(.4,0,.2,1);
+      border-radius:0 9px 9px 0;
+    }
+    .r3-pct-labels {
+      display:flex; justify-content:space-between;
+      font-size:11px; color:var(--muted,#888); margin-top:3px;
+    }
+
+    /* Controls row */
+    .r3-controls {
+      display:flex; gap:10px; margin-top:10px; align-items:center;
+    }
+    .r3-controls .btn-primary { flex:1; padding:10px; font-size:13px; }
+    .r3-controls .btn-secondary { flex:1; padding:10px; font-size:13px; }
+
+    /* Answer stats */
+    .r3-answer-stats {
+      font-size:11px; color:var(--muted,#888);
+      background:rgba(255,255,255,0.04); border-radius:6px;
+      padding:6px 10px; margin-top:8px;
+    }
+
+    /* Members area */
+    .r3-members-area {
+      flex:1; display:flex; overflow:hidden;
+    }
+    .r3-team-col {
+      flex:1; padding:14px 16px; overflow-y:auto; display:flex;
+      flex-direction:column; gap:6px;
+    }
+    .r3-team-col.pro-col {
+      border-right:1px solid rgba(255,255,255,0.06);
+      background:rgba(76,175,80,0.04);
+    }
+    .r3-team-col.anti-col {
+      background:rgba(244,67,54,0.04);
+    }
+    .r3-col-header {
+      display:flex; align-items:center; gap:8px; margin-bottom:8px;
+      padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .r3-col-header.pro { color:#4caf50; }
+    .r3-col-header.anti { color:#f44336; justify-content:flex-end; }
+    .r3-col-title { font-size:11px; font-weight:700; letter-spacing:1.5px; }
+    .r3-col-count { font-size:11px; background:rgba(255,255,255,0.1); border-radius:10px; padding:1px 7px; }
+
+    .r3-member-row {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:7px 10px; border-radius:8px; background:rgba(255,255,255,0.04);
+      transition:all .3s;
+    }
+    .r3-member-row.pro-row { border-left:3px solid #4caf50; }
+    .r3-member-row.anti-row { border-right:3px solid #f44336; flex-direction:row-reverse; }
+    .r3-member-name { font-size:13px; color:#ddd; font-weight:500; }
+    .r3-member-score { font-size:12px; font-weight:700; }
+    .pro-row .r3-member-score { color:#4caf50; }
+    .anti-row .r3-member-score { color:#f44336; }
+    .r3-member-rank {
+      font-size:11px; color:#888; min-width:16px; text-align:center;
+    }
+    .anti-row .r3-member-rank { text-align:right; }
+
+    /* Divider line */
+    .r3-divider {
+      width:2px; background:linear-gradient(to bottom, transparent, rgba(212,160,23,0.4), transparent);
+      flex-shrink:0;
+    }
+
+    /* Round 4 leaderboard (round4Score) */
+    .r4-lb-badge {
+      font-size:10px; color:#e491b0; letter-spacing:1px; font-weight:600;
+      background:rgba(228,145,176,0.12); border-radius:4px; padding:2px 6px;
+      margin-left:6px;
+    }
+  </style>
 </head>
 <body>
 
@@ -27,16 +174,22 @@
     <button class="btn-primary" id="host-start-btn" onclick="hostStartGame()">START MISSION</button>
   </div>
 
-  <!-- ═══ GAME PANEL ═══ -->
+  <!-- ═══ GAME PANEL (Round 1, 2, 4) ═══ -->
   <div id="host-game" class="hidden">
     <div class="host-game-panel">
-      <!-- Left: Current Question -->
+      <!-- Left: Question display (like player, no answer shown) -->
       <div class="host-q-panel">
-        <h3>CURRENT QUESTION</h3>
+        <h3 id="host-q-round-badge">CURRENT QUESTION</h3>
         <p style="font-size:10px;color:var(--muted);margin-bottom:8px" id="host-q-meta"></p>
         <p class="host-q-text" id="host-q-text"></p>
-        <div class="host-q-answer" id="host-q-answer"></div>
-        <div class="host-q-stats" id="host-q-stats"></div>
+
+        <!-- MCQ options (host view) -->
+        <div class="host-q-display" id="host-q-display"></div>
+
+        <!-- Stats -->
+        <div class="host-q-stats" id="host-q-stats" style="margin-top:10px"></div>
+
+        <!-- Controls -->
         <div class="host-controls" style="margin-top:16px">
           <button class="btn-primary" id="host-next-btn" onclick="hostNextQuestion()">NEXT QUESTION →</button>
           <button class="btn-secondary" id="host-reveal-btn" onclick="hostRevealAnswer()">REVEAL ANSWER</button>
@@ -44,8 +197,79 @@
       </div>
       <!-- Right: Leaderboard -->
       <div class="host-lb-panel">
-        <h3>LIVE LEADERBOARD</h3>
+        <h3>LIVE LEADERBOARD <span id="host-lb-badge" class="r4-lb-badge hidden">ROUND 4</span></h3>
         <ol class="host-lb-list" id="host-lb-list"></ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ROUND 3 BATTLE VIEW ═══ -->
+  <div id="host-round3-battle" class="hidden">
+    <!-- Top: Battle bar + controls -->
+    <div class="r3-battle-top">
+      <div class="r3-battle-header">
+        <div class="r3-battle-title">⚖️ GLOBALIZATION DEBATE — LIVE BATTLE</div>
+        <div class="r3-q-counter" id="r3-q-counter">Question 0 / 10</div>
+      </div>
+
+      <!-- Score row -->
+      <div class="r3-score-row">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:24px">🌐</span>
+          <div>
+            <div style="font-size:11px;color:#4caf50;font-weight:600;letter-spacing:1px">PRO</div>
+            <div class="r3-score-pro" id="r3-pro-score">0</div>
+          </div>
+        </div>
+        <div class="r3-vs-label">VS</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="text-align:right">
+            <div style="font-size:11px;color:#f44336;font-weight:600;letter-spacing:1px">ANTI</div>
+            <div class="r3-score-anti" id="r3-anti-score">0</div>
+          </div>
+          <span style="font-size:24px">🛡️</span>
+        </div>
+      </div>
+
+      <!-- Influence bar -->
+      <div class="r3-influence-bar">
+        <div class="r3-inf-pro" id="r3-inf-pro" style="width:50%"></div>
+        <div class="r3-inf-anti" id="r3-inf-anti" style="width:50%"></div>
+      </div>
+      <div class="r3-pct-labels">
+        <span id="r3-pro-pct">50%</span>
+        <span>— INFLUENCE —</span>
+        <span id="r3-anti-pct">50%</span>
+      </div>
+
+      <!-- Answer stats + controls -->
+      <div class="r3-answer-stats" id="r3-answer-stats">Waiting for answers...</div>
+      <div class="r3-controls">
+        <button class="btn-primary" id="r3-next-btn" onclick="hostNextQuestion()">NEXT QUESTION →</button>
+        <button class="btn-secondary" id="r3-reveal-btn" onclick="hostRevealAnswer()">REVEAL ANSWER</button>
+      </div>
+    </div>
+
+    <!-- Bottom: Member lists -->
+    <div class="r3-members-area">
+      <!-- PRO team (left) -->
+      <div class="r3-team-col pro-col" id="r3-pro-members">
+        <div class="r3-col-header pro">
+          <span style="font-size:18px">🌐</span>
+          <span class="r3-col-title">PRO GLOBALIZATION</span>
+          <span class="r3-col-count" id="r3-pro-count">0</span>
+        </div>
+        <!-- members populated by JS -->
+      </div>
+      <div class="r3-divider"></div>
+      <!-- ANTI team (right) -->
+      <div class="r3-team-col anti-col" id="r3-anti-members">
+        <div class="r3-col-header anti">
+          <span class="r3-col-count" id="r3-anti-count">0</span>
+          <span class="r3-col-title">ANTI GLOBALIZATION</span>
+          <span style="font-size:18px">🛡️</span>
+        </div>
+        <!-- members populated by JS -->
       </div>
     </div>
   </div>

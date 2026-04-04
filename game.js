@@ -16,8 +16,10 @@ let timeLeft = 20;
 let answered = false;
 let hintUsed = false;
 let matrixAnimFrame = null;
-let playerTeam = null;  // 'pro' or 'anti'
-let teamScore = 0;      // points earned during Round 3
+let playerTeam = null;   // 'pro' or 'anti'
+let teamScore = 0;       // points earned during Round 3
+let round4Score = 0;     // points earned ONLY in Round 4 (for team battle display)
+let sessionR3Questions = null; // synced from Firebase
 
 const TOTAL_TIME = 20;
 const TIMER_CIRCUMFERENCE = 2 * Math.PI * 22; // ~138.23
@@ -169,15 +171,28 @@ function handleSessionUpdate(session) {
   const qIdx = session.currentQuestion;
   const round = session.currentRound;
 
+  // Sync Round 3 questions from Firebase (once)
+  if (session.round3Questions && !sessionR3Questions) {
+    sessionR3Questions = session.round3Questions; // array of question IDs
+    // Rebuild QUESTIONS array for this player session
+    const r3Selected = sessionR3Questions.map(id =>
+      ROUND3_POOL.find(q => q.id === id)
+    ).filter(Boolean);
+    QUESTIONS = buildSessionQuestions(r3Selected);
+  }
+
   if (qIdx !== currentQ) {
     currentQ = qIdx;
     currentRound = round;
     answered = false;
     hintUsed = false;
 
-    // Check if need to show round intro
-    const q = QUESTIONS[qIdx];
-    const qInRound = qIdx - (round - 1) * 5; // 0-4 within round
+    // Determine position within round for round intro detection
+    let qInRound = 0;
+    if (round === 1) qInRound = qIdx;
+    else if (round === 2) qInRound = qIdx - 5;
+    else if (round === 3) qInRound = qIdx - 10;
+    else if (round === 4) qInRound = qIdx - 20;
 
     if (qInRound === 0) {
       showRoundIntro(round, () => loadQuestion(qIdx));
@@ -187,7 +202,6 @@ function handleSessionUpdate(session) {
   }
 
   if (session.showAnswer && !answered) {
-    // Time's up from host
     handleTimeout();
   }
 }
@@ -200,9 +214,11 @@ function showRoundIntro(round, callback) {
   document.getElementById('ri-name').textContent = r.name;
   document.getElementById('ri-sub').textContent = r.subtitle;
 
-  // Apply round accent color to badge
   const colors = { 1: '#cc0000', 2: '#00ff88', 3: '#d4a017', 4: '#e491b0' };
   document.getElementById('ri-badge').style.background = colors[round] || '#cc0000';
+
+  // Round 4: reset round4Score
+  if (round === 4) round4Score = 0;
 
   showScreen('screen-round-intro');
 
@@ -225,7 +241,11 @@ function showRoundIntro(round, callback) {
 function loadQuestion(qIdx) {
   const q = QUESTIONS[qIdx];
   const round = q.round;
-  const qInRound = qIdx - (round - 1) * 5;
+  // qInRound calculation (R3 is 10-19 in 25-q array)
+  let qInRound = qIdx;
+  if (round === 2) qInRound = qIdx - 5;
+  else if (round === 3) qInRound = qIdx - 10;
+  else if (round === 4) qInRound = qIdx - 20;
   const theme = ROUNDS[round].theme;
 
   showScreen('screen-question');
@@ -258,12 +278,13 @@ function loadQuestion(qIdx) {
   const feedbackBox = document.getElementById('feedback-box');
   feedbackBox.classList.add('hidden');
 
+  const totalInRound = round === 3 ? 10 : 5;
   if (round === 3) {
-    tag.textContent = 'MOTION BEFORE THE COURT';
+    tag.textContent = 'MOTION BEFORE THE COURT · Q' + (qInRound + 1) + ' OF 10';
   } else if (round === 2) {
-    tag.textContent = '// Q' + (qIdx + 1) + ' OF 20 · ' + q.topic.toUpperCase();
+    tag.textContent = 'ROUND 2 · Q' + (qInRound + 1) + ' OF 5 · ' + q.topic.toUpperCase();
   } else {
-    tag.textContent = 'ROUND ' + round + ' · Q' + (qInRound + 1) + ' OF 5 · ' + q.topic.toUpperCase();
+    tag.textContent = 'ROUND ' + round + ' · Q' + (qInRound + 1) + ' OF ' + totalInRound + ' · ' + q.topic.toUpperCase();
   }
 
   const fillinBanner = document.getElementById('fillin-banner');
@@ -349,13 +370,13 @@ function buildHeader(round, qIdx, q) {
         </div>
       </div>`;
     startStockTickers();
-  } else if (round === 3) {
+  } else  if (round === 3) {
     header.innerHTML = `
       <div class="q-topbar">
         <span style="font-size:22px">⚖️</span>
         <div class="r3-title-center">
           GLOBALIZATION DEBATE ARENA
-          <small>ROUND 3 · THE COURTROOM · Q${qInRound + 1} OF 5</small>
+          <small>ROUND 3 · THE COURTROOM · Q${qInRound + 1} OF 10</small>
         </div>
         <span style="font-size:20px">🏛️</span>
       </div>
@@ -524,6 +545,12 @@ function selectMCQ(idx, q) {
       teamScore += earned;
       db.ref('players/' + playerId).update({ teamScore: teamScore });
     }
+
+    // Round 4 individual tracking (still adds to total score above)
+    if (q.round === 4) {
+      round4Score += earned;
+      db.ref('players/' + playerId).update({ round4Score: round4Score });
+    }
   } else {
     streak = 0;
   }
@@ -600,6 +627,12 @@ function submitFillIn() {
     if (q.round === 3 && playerTeam) {
       teamScore += earned;
       db.ref('players/' + playerId).update({ teamScore: teamScore });
+    }
+
+    // Round 4 individual tracking
+    if (q.round === 4) {
+      round4Score += earned;
+      db.ref('players/' + playerId).update({ round4Score: round4Score });
     }
 
     showFeedback(true, earned, q.explanation);
@@ -771,7 +804,8 @@ function updateStreakBadge() {
 function buildProgressDots(currentIdx) {
   const container = document.getElementById('progress-dots');
   container.innerHTML = '';
-  for (let i = 0; i < 20; i++) {
+  const total = QUESTIONS ? QUESTIONS.length : 25;
+  for (let i = 0; i < total; i++) {
     const dot = document.createElement('span');
     dot.className = 'p-dot';
     if (i < currentIdx) dot.classList.add('done');
@@ -814,7 +848,7 @@ function showFinalResults() {
   document.getElementById('final-rank').textContent = rankTitle;
   document.getElementById('final-score').textContent = score.toLocaleString();
   document.getElementById('final-correct').textContent = correctCount;
-  document.getElementById('final-total').textContent = '20';
+  document.getElementById('final-total').textContent = QUESTIONS ? QUESTIONS.length.toString() : '25';
   document.getElementById('final-streak').textContent = maxStreak;
   document.getElementById('final-message').textContent = rankMsg;
 
