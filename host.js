@@ -11,6 +11,8 @@ let playersRef = db.ref('players');
 
 // Round 3 battle update interval
 let r3BattleInterval = null;
+let r3CountdownInterval = null;
+let r3CountdownSeconds = 180; // 3 minutes
 
 // ─── Initialize Session ───────────────────────────────────
 function initSession() {
@@ -417,6 +419,8 @@ function startR3BattleUpdates() {
   updateR3Battle(); // immediate first update
   if (r3BattleInterval) clearInterval(r3BattleInterval);
   r3BattleInterval = setInterval(updateR3Battle, 3000);
+  // Start 3-minute countdown
+  startR3Countdown();
 }
 
 function stopR3BattleUpdates() {
@@ -424,6 +428,95 @@ function stopR3BattleUpdates() {
     clearInterval(r3BattleInterval);
     r3BattleInterval = null;
   }
+  // Stop countdown
+  if (r3CountdownInterval) {
+    clearInterval(r3CountdownInterval);
+    r3CountdownInterval = null;
+  }
+}
+
+// ─── Round 3 Countdown (3 minutes) ───────────────────────
+function startR3Countdown() {
+  r3CountdownSeconds = 180;
+  if (r3CountdownInterval) clearInterval(r3CountdownInterval);
+
+  updateR3CountdownDisplay();
+
+  r3CountdownInterval = setInterval(() => {
+    r3CountdownSeconds--;
+    updateR3CountdownDisplay();
+
+    if (r3CountdownSeconds <= 0) {
+      clearInterval(r3CountdownInterval);
+      r3CountdownInterval = null;
+      // Time's up — auto-end Round 3
+      clearR3AutoAdvance();
+      stopR3BattleUpdates();
+      showDaddyReveal();
+    }
+  }, 1000);
+}
+
+function updateR3CountdownDisplay() {
+  const el = document.getElementById('r3-countdown');
+  if (!el) return;
+  const m = Math.floor(r3CountdownSeconds / 60);
+  const s = r3CountdownSeconds % 60;
+  el.textContent = m + ':' + String(s).padStart(2, '0');
+  if (r3CountdownSeconds <= 30) {
+    el.classList.add('warning');
+  } else {
+    el.classList.remove('warning');
+  }
+}
+
+// ─── Daddy Reveal Screen ──────────────────────────
+function showDaddyReveal() {
+  playersRef.once('value', snap => {
+    const players = snap.val() || {};
+    let proScore = 0, antiScore = 0;
+    Object.values(players).forEach(p => {
+      if (p.team === 'pro') proScore += (p.teamScore || 0);
+      else if (p.team === 'anti') antiScore += (p.teamScore || 0);
+    });
+
+    let winner = 'tie';
+    if (proScore > antiScore) winner = 'pro';
+    else if (antiScore > proScore) winner = 'anti';
+
+    // Write winner to Firebase so players can show their image
+    sessionRef.update({ r3Winner: winner, status: 'r3_reveal' });
+
+    const img = document.getElementById('daddy-reveal-img');
+    const title = document.getElementById('daddy-reveal-title');
+    const sub = document.getElementById('daddy-reveal-sub');
+
+    if (winner === 'tie') {
+      img.src = 'dady like.jpg';
+      title.textContent = "IT'S A TIE!";
+      title.style.color = '#d4a017';
+      sub.textContent = 'Both teams performed equally!';
+    } else if (winner === 'pro') {
+      img.src = 'dady like.jpg';
+      title.textContent = '🌐 PRO GLOBALIZATION WINS!';
+      title.style.color = '#4caf50';
+      sub.textContent = 'The PRO team dominated the debate!';
+    } else {
+      img.src = 'dady phat.jpg';
+      title.textContent = '🛡️ ANTI GLOBALIZATION WINS!';
+      title.style.color = '#f44336';
+      sub.textContent = 'The ANTI team dominated the debate!';
+    }
+
+    document.getElementById('host-round3-battle').classList.add('hidden');
+    document.getElementById('host-daddy-reveal').classList.remove('hidden');
+  });
+}
+
+// Called when host clicks "VIEW FULL RESULTS" on daddy reveal screen
+function hostShowTeamResults() {
+  document.getElementById('host-daddy-reveal').classList.add('hidden');
+  showHostTeamResults();
 }
 
 function updateR3Battle() {

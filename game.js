@@ -156,6 +156,8 @@ function confirmName() {
       showFunFact(session.currentRound);
     } else if (session && session.status === 'team_selection') {
       showTeamSelection();
+    } else if (session && session.status === 'r3_reveal') {
+      showR3Reveal(session.r3Winner);
     } else if (session && session.status === 'team_results') {
       showTeamResults();
     } else if (session && session.status === 'ended') {
@@ -896,6 +898,48 @@ function showFunFact(round) {
   document.getElementById('funfact-text').textContent = r.funFact;
   showScreen('screen-funfact');
   stopMatrixRain();
+}
+
+// ─── Round 3 Winner Reveal (Daddy Image) ───
+function showR3Reveal(winner) {
+  stopTimer();
+  stopMatrixRain();
+  showScreen('screen-r3-reveal');
+
+  const img = document.getElementById('r3-reveal-img');
+  const title = document.getElementById('r3-reveal-title');
+  const subtitle = document.getElementById('r3-reveal-subtitle');
+
+  // Determine if player's team won or lost
+  const myTeam = playerTeam; // 'pro', 'anti', or null
+
+  let playerWon = false;
+  if (winner === 'tie') {
+    playerWon = true; // tie = both teams get "like"
+  } else if (myTeam === winner) {
+    playerWon = true;
+  }
+
+  if (winner === 'tie') {
+    img.src = 'dady like.jpg';
+    title.textContent = "IT'S A TIE!";
+    title.style.color = '#d4a017';
+    subtitle.textContent = 'Both teams fought equally hard!';
+  } else if (playerWon) {
+    img.src = 'dady like.jpg';
+    title.textContent = '🏆 YOUR TEAM WINS!';
+    title.style.color = '#4caf50';
+    subtitle.textContent = winner === 'pro'
+      ? '🌐 PRO GLOBALIZATION takes the debate!'
+      : '🛡️ ANTI GLOBALIZATION takes the debate!';
+  } else {
+    img.src = 'dady phat.jpg';
+    title.textContent = '😔 YOUR TEAM LOST...';
+    title.style.color = '#f44336';
+    subtitle.textContent = winner === 'pro'
+      ? '🌐 PRO GLOBALIZATION wins the debate.'
+      : '🛡️ ANTI GLOBALIZATION wins the debate.';
+  }
 }
 
 // ─── Final Results ───

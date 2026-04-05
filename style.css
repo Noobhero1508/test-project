@@ -2069,3 +2069,59 @@ body {
   .podium-place.second,
   .podium-place.third { min-width: 80px; }
 }
+
+/* ═══════════════════════════════════════
+   SCREEN R3-REVEAL: Daddy Win/Lose Image
+   ═══════════════════════════════════════ */
+.r3-reveal-screen {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: #000;
+  padding: 20px;
+  gap: 16px;
+}
+
+.r3-reveal-img {
+  max-width: min(88vw, 480px);
+  max-height: 60vh;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 0 60px rgba(255,255,255,0.15);
+  animation: r3-zoom-in 0.5s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+
+@keyframes r3-zoom-in {
+  from { transform: scale(0.4); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.r3-reveal-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 4px;
+  animation: r3-slide-up 0.5s 0.3s ease both;
+}
+
+.r3-reveal-subtitle {
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 1px;
+  animation: r3-slide-up 0.5s 0.45s ease both;
+}
+
+.r3-reveal-waiting {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  animation: r3-slide-up 0.5s 0.6s ease both;
+}
+
+@keyframes r3-slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
