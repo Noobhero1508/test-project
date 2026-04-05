@@ -270,6 +270,7 @@ function hostNextQuestion() {
   if (newRound !== prevRound) {
     // Round transition
     if (prevRound === 3) {
+      clearR3AutoAdvance();
       showHostTeamResults();
       return;
     }
@@ -293,6 +294,8 @@ function hostNextQuestion() {
     // Reset reveal btn
     const r3Rev = document.getElementById('r3-reveal-btn');
     if (r3Rev) r3Rev.disabled = false;
+    // Restart auto-advance for next Round 3 question
+    startR3AutoAdvance();
   } else {
     loadHostQuestion(hostCurrentQ);
   }
@@ -361,6 +364,24 @@ function startHostTeamListener() {
   });
 }
 
+// ─── Round 3 Auto-advance Timer ──────────────────────────
+let r3AutoTimer = null;
+
+function startR3AutoAdvance() {
+  clearR3AutoAdvance();
+  // Auto-advance after 25s (timer 20s + 5s buffer for wrong answers)
+  r3AutoTimer = setTimeout(() => {
+    hostNextQuestion();
+  }, 25000);
+}
+
+function clearR3AutoAdvance() {
+  if (r3AutoTimer) {
+    clearTimeout(r3AutoTimer);
+    r3AutoTimer = null;
+  }
+}
+
 // ─── Start Round 3 (show battle view) ────────────────────
 function hostStartRound3() {
   teamListenerActive = false;
@@ -386,6 +407,9 @@ function hostStartRound3() {
 
   // Start live battle updates
   startR3BattleUpdates();
+
+  // Start auto-advance for Round 3
+  startR3AutoAdvance();
 }
 
 // ─── Round 3 Battle View — Live Updates ─────────────────
@@ -473,6 +497,7 @@ function updateR3Battle() {
 // ─── Show Team Results (after Round 3) ───────────────────
 function showHostTeamResults() {
   stopR3BattleUpdates();
+  clearR3AutoAdvance();
   sessionRef.update({ status: 'team_results' });
   updateHostStatus('team_results');
 
