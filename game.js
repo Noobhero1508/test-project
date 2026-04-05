@@ -895,7 +895,19 @@ function buildProgressDots(currentIdx) {
 function showFunFact(round) {
   const r = ROUNDS[round];
   if (!r) return;
-  document.getElementById('funfact-text').textContent = r.funFact;
+
+  const titleEl = document.getElementById('funfact-title');
+  const bodyEl  = document.getElementById('funfact-text');
+
+  if (r.funFactTitle) {
+    titleEl.textContent = r.funFactTitle;
+    titleEl.classList.remove('hidden');
+  } else {
+    titleEl.textContent = '';
+    titleEl.classList.add('hidden');
+  }
+  bodyEl.textContent = r.funFactBody;
+
   showScreen('screen-funfact');
   stopMatrixRain();
 }

@@ -312,7 +312,19 @@ function showHostFunFact(round) {
   document.getElementById('host-game').classList.add('hidden');
   document.getElementById('host-round3-battle').classList.add('hidden');
   document.getElementById('host-funfact').classList.remove('hidden');
-  document.getElementById('host-funfact-text').textContent = ROUNDS[round].funFact;
+
+  const r = ROUNDS[round];
+  const titleEl = document.getElementById('host-funfact-title');
+  const bodyEl  = document.getElementById('host-funfact-text');
+
+  if (r && r.funFactTitle) {
+    titleEl.textContent = r.funFactTitle;
+    titleEl.classList.remove('hidden');
+  } else {
+    titleEl.textContent = '';
+    titleEl.classList.add('hidden');
+  }
+  if (r) bodyEl.textContent = r.funFactBody;
 }
 
 // ─── Continue to Next Round ──────────────────────────────

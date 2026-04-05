@@ -554,28 +554,32 @@ const ROUNDS = {
     subtitle: "Phrasal Verbs · Global Issues",
     icon: "📺",
     theme: "breaking-news",
-    funFact: "Phrasal verbs are everywhere! Native English speakers use over 5,000 phrasal verbs in daily life. Mastering just 50 common ones can dramatically boost your fluency — verbs like 'come down with', 'lay off', and 'wipe out' appear in news headlines every single day."
+    funFactTitle: "🚨 [DECLASSIFIED INTEL: AI AND JOBS] 🚨",
+    funFactBody: "Did you know? AI is changing the world fast. Because of this, some companies have to lay off workers. But on the bright side, humans have come up with millions of new tech jobs. AI might wipe out old tasks, but it creates a new future!"
   },
   2: {
     name: "Trade Floor",
     subtitle: "Economics · Global Trade",
     icon: "📈",
     theme: "trade-floor",
-    funFact: "Vietnam is one of the world's top 10 exporters of coffee, textiles, and electronics — globalization has completely transformed Vietnam's economy in the past 30 years. Fair-trade products now generate over $9 billion annually worldwide!"
+    funFactTitle: "🚨 [DECLASSIFIED INTEL: THE GLOBAL SMARTPHONE] 🚨",
+    funFactBody: "Did you know? No single country can build a smartphone alone! Companies rely on outsourcing and imports from over 40 different countries to make just one phone. Without global infrastructure like the internet and shipping networks, your phone would not exist!"
   },
   3: {
     name: "Debate Stage",
     subtitle: "AI Security Protocol · Grammar Firewall",
     icon: "⚖️",
     theme: "debate-arena",
-    funFact: "In English, separable phrasal verbs (like 'wipe out', 'lay off') follow a strict pronoun rule: the pronoun MUST go in the MIDDLE — never at the end! But 3-word phrasal verbs (like 'put up with') are completely LOCKED — they can never be split apart."
+    funFactTitle: "🚨 [DECLASSIFIED INTEL: DYING LANGUAGES] 🚨",
+    funFactBody: "Did you know? Globalization connects us, but it causes homogenization (cultures becoming exactly the same). Right now, one human language dies every 14 days! Luckily, scientists are using AI to translate and save these rare languages before they disappear forever."
   },
   4: {
     name: "Culture Shock",
     subtitle: "Adaptation · Idioms · Debate",
     icon: "🌏",
     theme: "culture-shock",
-    funFact: "Psychologist Kalervo Oberg was the first person to describe 'culture shock' in 1960. Idioms like 'fish out of water', 'pulling someone's leg', and 'sitting on the fence' are used every day — even by native speakers who don't realize they're using figurative language!"
+    funFactTitle: "",
+    funFactBody: "Psychologist Kalervo Oberg was the first person to describe 'culture shock' in 1960. Idioms like 'fish out of water', 'pulling someone's leg', and 'sitting on the fence' are used every day — even by native speakers who don't realize they're using figurative language!"
   }
 };
 
