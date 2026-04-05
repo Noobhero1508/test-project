@@ -1,531 +1,524 @@
 // ═══════════════════════════════════════════════════════════
-//  GLOBAL AGENT MISSION — Question Bank
+//  GLOBAL AGENT MISSION — Question Bank  (Updated)
 // ═══════════════════════════════════════════════════════════
 
-// ─── Round 1, 2, 4 Questions (fixed, 5 each) ───────────────
+// ─── Round 1 · Breaking News · Phrasal Verbs (5 questions) ─
 const QUESTIONS_R1 = [
   {
     id: 'r1q0',
     round: 1,
     type: "mcq",
-    topic: "Phrasal verb meaning",
-    question: '"Wipe out" most closely means ___?',
+    topic: "Intel Check",
+    question: 'A mysterious new virus has appeared in Sector 7. Citizens are starting to "get sick" with it. Which phrasal verb means "to become sick with an illness"?',
     options: [
-      "to improve slowly",
-      "to destroy completely",
-      "to report to the media",
-      "to hire new workers"
+      "Lay off",
+      "Come down with",
+      "Bring about",
+      "Put up with"
     ],
     answer: 1,
-    explanation: '"Wipe out" = xóa sổ hoàn toàn. Ex: "The flood wiped out entire villages."'
+    explanation: 'Think about how your energy goes "down" when you are sick. "Come down with" = bị mắc bệnh. Ex: "She came down with the flu."'
   },
   {
     id: 'r1q1',
     round: 1,
     type: "mcq",
-    topic: "Phrasal verb in context",
-    question: "The new trade deal will ___ thousands of new jobs in the region.",
+    topic: "Scenario Analysis",
+    question: 'Economic crisis! A major tech corporation is forced to fire its workers to save money. What is the correct term for "firing employees for economic reasons"?',
     options: [
-      "come down with",
-      "wipe out",
-      "bring about",
-      "lay off"
+      "Come up with",
+      "Wipe out",
+      "Go without",
+      "Lay off"
     ],
-    answer: 2,
-    explanation: '"Bring about" = gây ra, dẫn đến. Dùng cho sự kiện tích cực hoặc tiêu cực.'
+    answer: 3,
+    explanation: 'When you remove someone from their job, you "lay" them "off". "Lay off" = cho thôi việc vì lý do kinh tế.'
   },
   {
     id: 'r1q2',
     round: 1,
-    type: "fillin",
-    topic: "Phrasal verb",
-    question: 'The tsunami ___________ thousands of coastal villages overnight.',
-    blankBefore: "The tsunami",
-    blankAfter: "thousands of coastal villages overnight.",
-    answer: "wiped out",
-    hintLetters: ["w", "o"],
-    explanation: '"Wipe out" = phá hủy hoàn toàn, dùng cho thảm họa tự nhiên hoặc kinh tế.'
+    type: "mcq",
+    topic: "Comms Intercept",
+    question: 'You intercept a classified message. You need to tell your partner this highly surprising news. Which conversational strategy should you use to start your sentence?',
+    options: [
+      "You'd think...",
+      "Can you believe...",
+      "Well, that's another story.",
+      "It just goes to show you..."
+    ],
+    answer: 1,
+    explanation: '"Can you believe..." = Bạn có tin được không... — dùng để chia sẻ tin tức gây ngạc nhiên. Ex: "Can you believe they closed the border?"'
   },
   {
     id: 'r1q3',
     round: 1,
     type: "mcq",
-    topic: "Correct usage",
-    question: 'Which sentence uses "come down with" CORRECTLY?',
+    topic: "Comms Strategy",
+    question: 'The mission failed, but nobody got hurt. To shift the conversation from a negative fact to a positive perspective, you say: "We lost the target, but _____________, we gathered useful data."',
     options: [
-      "The company came down with 200 workers.",
-      "She came down with a bad cold after the trip.",
-      "They came down with the new policy last week.",
-      "He came down with the stock market."
+      "On the bright side...",
+      "You'd think...",
+      "That's another story...",
+      "Can you believe..."
     ],
-    answer: 1,
-    explanation: '"Come down with" chỉ dùng cho bệnh tật, không dùng cho kinh tế.'
+    answer: 0,
+    explanation: '"Bright" means full of light, hope, and positivity. "On the bright side" = Nhìn vào mặt tích cực — dùng để chuyển hướng sang điểm tốt.'
   },
   {
     id: 'r1q4',
     round: 1,
-    type: "mcq",
-    topic: "Global issues vocabulary",
-    question: "According to News Report 2 in the unit, what was the general public attitude toward globalization?",
-    options: [
-      "Mostly negative — fear of job loss",
-      "Mixed — both positive and negative views",
-      "Mostly positive — support for open markets",
-      "Indifferent — no strong opinion"
-    ],
-    answer: 1,
-    explanation: "Bài nghe Lesson 1 mô tả thái độ đa chiều của người dân."
+    type: "fillin",
+    topic: "Decryption Required",
+    question: 'Our objective is to completely destroy the enemy\'s computer virus. Type the missing word: WIPE _ _ _',
+    blankBefore: "Our objective: WIPE",
+    blankAfter: "the enemy's virus.",
+    answer: "out",
+    hintLetters: ["o"],
+    explanation: '"Wipe out" = tiêu diệt hoàn toàn. Hint: 3-letter preposition — exact opposite of "IN". Ex: "The flood wiped out the village."'
   }
 ];
 
+// ─── Round 2 · Trade Floor · Economics (5 questions) ────────
 const QUESTIONS_R2 = [
   {
     id: 'r2q0',
     round: 2,
     type: "mcq",
-    topic: "Separability rule",
-    question: "Which sentence is grammatically CORRECT?",
+    topic: "Market Intel",
+    question: 'Target Country A is buying millions of cars produced in other nations and bringing them inside their borders. Goods brought INTO a country are called:',
     options: [
-      "She turned off the lights before leaving.",
-      "She turned the off lights before leaving.",
-      "She off turned the lights before leaving.",
-      "She turned the lights before leaving off."
+      "Exports",
+      "Imports",
+      "Prosperity",
+      "Income"
     ],
-    answer: 0,
-    explanation: 'Separable phrasal verb: "Turn off the lights" = "Turn the lights off" — cả hai đều đúng. Với pronoun: PHẢI tách — "Turn them off".'
+    answer: 1,
+    explanation: 'Focus on the prefix "Im-", which sounds like "In". "Imports" = hàng nhập khẩu — hàng hóa được mua từ nước ngoài và đưa vào trong nước.'
   },
   {
     id: 'r2q1',
     round: 2,
     type: "mcq",
-    topic: "Separability with pronoun",
-    question: '"She brought ___ her old memories." — Which is correct?',
+    topic: "Corporate Strategy",
+    question: 'A company in New York wants to save money, so they hire online workers in Asia to do their programming. Finding workers from an outside source is called:',
     options: [
-      "She brought up her old memories.",
-      "She brought her old up memories.",
-      "She brought her up old memories.",
-      "Both A and B are correct."
+      "Homogenization",
+      "Fair-trade",
+      "Outsourcing",
+      "Standard of living"
     ],
-    answer: 0,
-    explanation: 'Với danh từ, cả hai vị trí đều được: "brought up her memories" hoặc "brought her memories up". Với đại từ PHẢI tách: "brought them up".'
+    answer: 2,
+    explanation: '"Outsourcing" = thuê ngoài — thuê lao động từ nguồn bên ngoài, thường ở nước khác để tiết kiệm chi phí.'
   },
   {
     id: 'r2q2',
     round: 2,
-    type: "fillin",
-    topic: "Economic vocabulary",
-    question: 'The rate of people without jobs in the region is called the ___________.',
-    blankBefore: "The rate of people without jobs in the region is called the",
-    blankAfter: ".",
-    answer: "unemployment rate",
-    hintLetters: ["u", "r"],
-    explanation: "Unemployment rate = tỷ lệ thất nghiệp. Một trong các chỉ số kinh tế vĩ mô cơ bản."
+    type: "mcq",
+    topic: "Cultural Observation",
+    question: 'You travel undercover to 5 different countries, but every street looks exactly the same. They all have the same global coffee shops. This process of diverse cultures becoming exactly the same is called:',
+    options: [
+      "Homogenization",
+      "Infrastructure",
+      "Prosperity",
+      "Investment"
+    ],
+    answer: 0,
+    explanation: 'The prefix "Homo-" means "same" or "identical". "Homogenization" = đồng nhất hóa — quá trình các nền văn hóa đa dạng trở nên giống nhau.'
   },
   {
     id: 'r2q3',
     round: 2,
     type: "mcq",
-    topic: "Economic vocabulary matching",
-    question: "When a country SELLS its products to other countries, those products are called:",
+    topic: "City Scan",
+    question: 'To transport secret cargo, we need good roads, bridges, and fast telecommunications. The physical networks and systems that keep a country running are known as its:',
     options: [
-      "imports",
-      "investments",
-      "exports",
-      "tariffs"
+      "Wages",
+      "Employment rate",
+      "Exports",
+      "Infrastructure"
     ],
-    answer: 2,
-    explanation: "Export = xuất khẩu (bán ra ngoài). Import = nhập khẩu (mua từ ngoài vào)."
+    answer: 3,
+    explanation: '"Infrastructure" = cơ sở hạ tầng — hệ thống đường sá, cầu cống, viễn thông giúp duy trì hoạt động của một quốc gia.'
   },
   {
     id: 'r2q4',
     round: 2,
-    type: "mcq",
-    topic: "Context + vocabulary",
-    question: "Vietnam's coffee industry has benefited greatly from ___ to Europe and the US.",
-    options: [
-      "imports",
-      "unemployment",
-      "investments",
-      "exports"
-    ],
-    answer: 3,
-    explanation: "Việt Nam bán cà phê ra nước ngoài = export (xuất khẩu)."
+    type: "fillin",
+    topic: "Decryption Required",
+    question: 'You intercept a trade document guaranteeing honest wages and safe working conditions for poor farmers in developing nations. This ethical business model is called: _ _ _ _ - TRADE.',
+    blankBefore: "This ethical business model is called:",
+    blankAfter: "-TRADE.",
+    answer: "fair",
+    hintLetters: ["f"],
+    explanation: '"Fair-trade" = thương mại công bằng. Hint: In sports, playing by the rules without cheating is called "___ play". Answer: FAIR.'
   }
 ];
 
+// ─── Round 4 · Culture Shock · Adaptation (5 questions) ─────
 const QUESTIONS_R4 = [
   {
     id: 'r4q0',
     round: 4,
     type: "mcq",
-    topic: "Stage identification",
+    topic: "Psych Assessment — Idiom",
     stage: "honeymoon",
-    question: '"I just arrived in Japan and everything is wonderful — the food, the people, the culture! I feel so lucky to be here." Which stage of culture shock is this?',
+    question: 'During your first week in the foreign city, you don\'t know the language or the customs. You feel completely uncomfortable, like you don\'t belong here. You feel like a:',
     options: [
-      "Frustration Stage",
-      "Acceptance Stage",
-      "Depression Stage",
-      "Honeymoon Stage"
+      "Bird in a cage",
+      "Cat on a hot roof",
+      "Fish out of water",
+      "Dog in the street"
     ],
-    answer: 3,
-    explanation: "Honeymoon Stage = giai đoạn trăng mật. Mọi thứ đều mới mẻ và thú vị."
+    answer: 2,
+    explanation: '"Fish out of water" = Cá ra khỏi nước — cảm giác hoàn toàn không thuộc về nơi này. Imagine an animal taken entirely out of its natural environment!'
   },
   {
     id: 'r4q1',
     round: 4,
     type: "mcq",
-    topic: "Correct sequence",
-    stage: "honeymoon",
-    question: "What is the CORRECT order of the four stages of culture shock?",
+    topic: "Psych Assessment — Idiom",
+    stage: "frustration",
+    question: 'A foreign agent tells you a terrifying lie, then suddenly laughs and says he was only joking. The idiom for "joking/tricking someone" is "Pulling someone\'s ________".',
     options: [
-      "Frustration → Honeymoon → Acceptance → Depression",
-      "Honeymoon → Frustration → Depression → Acceptance",
-      "Honeymoon → Depression → Frustration → Acceptance",
-      "Acceptance → Honeymoon → Depression → Frustration"
+      "Arm",
+      "Hair",
+      "Ear",
+      "Leg"
     ],
-    answer: 1,
-    explanation: "Thứ tự đúng: Trăng mật → Thất vọng → Trầm cảm → Chấp nhận."
+    answer: 3,
+    explanation: '"Pulling someone\'s leg" = trêu đùa / đánh lừa ai đó. This is a fixed idiom — always "leg", never another body part!'
   },
   {
     id: 'r4q2',
     round: 4,
-    type: "fillin",
-    topic: "Advice for culture shock",
-    stage: "frustration",
-    question: 'The difficulty of communicating in a foreign country is known as a language ___________.',
-    blankBefore: "The difficulty of communicating in a foreign country is known as a language",
-    blankAfter: ".",
-    answer: "barrier",
-    hintLetters: ["b"],
-    explanation: "Language barrier = rào cản ngôn ngữ. Nguyên nhân chính gây ra Frustration Stage."
+    type: "mcq",
+    topic: "Psych Assessment — Idiom",
+    stage: "depression",
+    question: 'Two local politicians are arguing about globalization. You refuse to choose a side and remain undecided/neutral. The idiom for this is "Sitting on the ________".',
+    options: [
+      "Fence",
+      "Wall",
+      "Table",
+      "Roof"
+    ],
+    answer: 0,
+    explanation: '"Sitting on the fence" = không đứng về phía nào, trung lập. What wooden structure separates two neighbors\' yards? You are sitting right in the middle of it!'
   },
   {
     id: 'r4q3',
     round: 4,
     type: "mcq",
-    topic: "Essay structure",
-    stage: "depression",
-    question: "In a 4-paragraph counter-argument essay about globalization, what should paragraph 2 contain?",
+    topic: "Debate Protocol",
+    stage: "acceptance",
+    question: 'An enemy journalist writes an article claiming "Globalization is terrible." Your mission is to write an essay arguing against their opinion using strong evidence. The academic term for "arguing against an opposing view" is:',
     options: [
-      "Your main argument supporting globalization",
-      "The opposing viewpoint you are arguing against",
-      "Your conclusion and final recommendation",
-      "Statistics and data only"
+      "Summarizing",
+      "Rebutting",
+      "Agreeing",
+      "Brainstorming"
     ],
     answer: 1,
-    explanation: "Cấu trúc: P1: Introduction | P2: Opposing view | P3: Your counter-argument | P4: Conclusion"
+    explanation: '"Rebutting" = phản bác — đưa ra lập luận và bằng chứng để chống lại quan điểm đối lập. A key skill in academic debate!'
   },
   {
     id: 'r4q4',
     round: 4,
-    type: "mcq",
-    topic: "Acceptance stage",
+    type: "fillin",
+    topic: "The Final Boss",
     stage: "acceptance",
-    question: "Which behavior BEST describes someone in the Acceptance Stage of culture shock?",
-    options: [
-      "Finding everything in the new country exciting and amazing",
-      "Feeling frustrated by small cultural differences every day",
-      "Feeling homesick and isolated, wanting to go back home",
-      "Beginning to adapt and find balance between home and new culture"
-    ],
-    answer: 3,
-    explanation: "Acceptance Stage = bắt đầu thích nghi, tìm được sự cân bằng giữa văn hóa cũ và mới."
+    question: 'The feeling of confusion, anxiety, and isolation you experience when moving to a completely different cultural environment is officially known as "Culture _______". Type the missing word: S _ _ _ K',
+    blankBefore: 'This feeling is officially known as "Culture',
+    blankAfter: '".',
+    answer: "shock",
+    hintLetters: ["s"],
+    explanation: '"Culture Shock" = sốc văn hóa. Hint: A 5-letter word — what happens when you touch a broken electrical wire. Also: a sudden, intense feeling of surprise or trauma.'
   }
 ];
 
-// ─── Round 3 Pool (20 câu, random 10 mỗi ván) ─────────────
+// ─── Round 3 Pool · Debate Stage · AI Security Protocol ─────
+// 20 questions — system randomly selects 10 per session
 const ROUND3_POOL = [
-  // ── Nhóm 1: Advantage / Disadvantage nhận biết ──
+  // ── Q11: Syntax Hack — wipe out ──
   {
     id: 'r3p0',
     round: 3,
     type: "mcq",
-    topic: "Pro or Con identification",
-    question: '"Globalization reduces poverty in developing countries." This statement is a(n):',
+    topic: "Syntax Hack — Directive 1",
+    question: '[Syntax Hack] Target: "wipe out" (2 words). Pronoun: "it". Choose the correct AI syntax:\n\nDirective 1: For 2-word verbs, if the object is a pronoun, you MUST trap it in the MIDDLE!',
     options: [
-      "Disadvantage of globalization",
-      "Advantage of globalization",
-      "Neither — it's a neutral fact",
-      "False claim not mentioned in the unit"
+      "Wipe out it",
+      "Wipe it out"
     ],
     answer: 1,
-    explanation: "Bài đọc Lesson 3 đề cập globalization giúp giảm nghèo ở các nước đang phát triển."
+    explanation: 'Directive 1: 2-word separable verbs MUST have pronoun in the MIDDLE. ✅ "Wipe IT out" — never "Wipe out IT".'
   },
+  // ── Q12: Syntax Hack — lay off ──
   {
     id: 'r3p1',
     round: 3,
     type: "mcq",
-    topic: "Vocabulary definition",
-    question: '"Cultural uniformity" refers to:',
+    topic: "Syntax Hack — Directive 1",
+    question: '[Syntax Hack] Target: "lay off" (2 words). Pronoun: "them".\n\nDirective 1: For 2-word verbs + pronoun → trap it in the MIDDLE!',
     options: [
-      "A country enforcing one official language",
-      "Different cultures becoming increasingly similar worldwide",
-      "Diversity increasing across all world regions",
-      "A nation protecting its traditional exports"
+      "Lay off them",
+      "Lay them off"
     ],
     answer: 1,
-    explanation: "Cultural uniformity = đồng nhất văn hóa. Một hệ quả của toàn cầu hóa."
+    explanation: 'Directive 1: "Lay THEM off" ✅ — the pronoun goes BETWEEN the two words. "Lay off them" ❌ is incorrect.'
   },
+  // ── Q13: Syntax Hack — carry out ──
   {
     id: 'r3p2',
     round: 3,
-    type: "fillin",
-    topic: "Globalization vocabulary",
-    question: 'Globalization can ___________ the gap between rich and poor countries.',
-    blankBefore: "Globalization can",
-    blankAfter: "the gap between rich and poor countries.",
-    answer: "widen",
-    hintLetters: ["w"],
-    explanation: '"Widen the gap" = mở rộng khoảng cách. Đây là một nhược điểm của toàn cầu hóa.'
+    type: "mcq",
+    topic: "Syntax Hack — Directive 1",
+    question: '[Syntax Hack] Target: "carry out" (to execute a plan — 2 words). Pronoun: "it".\n\nDirective 1 applies. Choose correctly:',
+    options: [
+      "Carry it out",
+      "Carry out it"
+    ],
+    answer: 0,
+    explanation: '"Carry IT out" ✅ — pronoun trapped in the MIDDLE per Directive 1. "Carry out it" ❌ violates the rule.'
   },
+  // ── Q14: Syntax Hack — bring about ──
   {
     id: 'r3p3',
     round: 3,
     type: "mcq",
-    topic: "NOT a disadvantage",
-    question: "Which of the following is NOT listed as a disadvantage of globalization in the unit?",
+    topic: "Syntax Hack — Directive 1",
+    question: '[Syntax Hack] Target: "bring about" (to cause a change — 2 words). Pronoun: "it".\n\nApply Directive 1:',
     options: [
-      "Widens the gap between rich and poor",
-      "Threatens small local businesses",
-      "Increases access to diverse goods and services",
-      "May lead to cultural uniformity"
+      "Bring it about",
+      "Bring about it"
     ],
-    answer: 2,
-    explanation: "Việc tăng tiếp cận hàng hóa đa dạng là một LỢI ÍCH, không phải bất lợi."
+    answer: 0,
+    explanation: '"Bring IT about" ✅ — 2-word verb + pronoun → pronoun in the MIDDLE. "Bring about it" ❌ is wrong.'
   },
+  // ── Q15: Security Alert — come up with ──
   {
     id: 'r3p4',
     round: 3,
     type: "mcq",
-    topic: "English as global language",
-    question: "According to Lesson 3 listening, which is a RISK of English becoming the dominant global language?",
+    topic: "Security Alert — Directive 2",
+    question: '[Security Alert!] Target: "come up with" (to invent an idea — 3 words).\n\nDirective 2: 3-word verbs are LOCKED. They can NEVER be separated!',
     options: [
-      "It makes international business easier",
-      "It allows people from different countries to communicate",
-      "It may threaten and overshadow other languages and cultures",
-      "It increases the number of English speakers worldwide"
+      "Come up with a plan",
+      "Come up a plan with"
     ],
-    answer: 2,
-    explanation: "Bài nghe Lesson 3 đề cập rủi ro tiếng Anh thống trị và lấn át các ngôn ngữ + văn hóa khác."
+    answer: 0,
+    explanation: 'Directive 2: 3-word phrasal verbs are LOCKED — never separated! ✅ "Come up with a plan". ❌ "Come up a plan with" violates Directive 2.'
   },
-  // ── Nhóm 2: Vocabulary mới ──
+  // ── Q16: Security Alert — put up with ──
   {
     id: 'r3p5',
     round: 3,
     type: "mcq",
-    topic: "Globalization definition",
-    question: 'Which BEST defines "globalization"?',
+    topic: "Security Alert — Directive 2",
+    question: '[Security Alert!] Target: "put up with" (to tolerate — 3 words). Pronoun: "it".\n\nDirective 2: 3-word verbs are LOCKED. Pronoun goes at the END!',
     options: [
-      "The process of a country becoming independent from others",
-      "The process of economies, cultures and societies becoming more connected",
-      "Importing more goods than a country exports",
-      "Governments reducing taxes on local businesses"
+      "Put up it with",
+      "Put up with it"
     ],
     answer: 1,
-    explanation: "Globalization = quá trình các nền kinh tế, văn hóa và xã hội kết nối chặt chẽ hơn."
+    explanation: '"Put up with IT" ✅ — 3-word verbs are LOCKED, pronoun ALWAYS goes at the END. "Put up IT with" ❌ violates Directive 2.'
   },
+  // ── Q17: System Exception — go without ──
   {
     id: 'r3p6',
     round: 3,
     type: "mcq",
-    topic: "Economic advantage",
-    question: "Which is a CLEAR economic advantage of globalization for developing countries?",
+    topic: "System Exception",
+    question: '[System Exception!] "Go without" (to live lacking something) has 2 words but it CANNOT be separated. Choose the correct syntax:',
     options: [
-      "Loss of local cultural identity",
-      "Increased unemployment due to foreign competition",
-      "Access to foreign investment and technology",
-      "Rising prices of domestic goods"
+      "Go without it",
+      "Go it without"
     ],
-    answer: 2,
-    explanation: "FDI (Foreign Direct Investment) và chuyển giao công nghệ là lợi ích kinh tế cốt lõi của toàn cầu hóa."
+    answer: 0,
+    explanation: '"Go without" is a special INSEPARABLE 2-word verb — even with a pronoun, the pronoun goes at the END. ✅ "Go without it".'
   },
+  // ── Q18: Identify Malware ──
   {
     id: 'r3p7',
     round: 3,
-    type: "fillin",
-    topic: "Trade vocabulary",
-    question: 'When countries remove trade barriers and allow free exchange of goods, this is called free ___________.',
-    blankBefore: "When countries remove trade barriers and allow free exchange of goods, this is called free",
-    blankAfter: ".",
-    answer: "trade",
-    hintLetters: ["t"],
-    explanation: "Free trade = thương mại tự do. Nền tảng của toàn cầu hóa kinh tế."
+    type: "mcq",
+    topic: "Identify Malware",
+    question: '[Identify Malware] Find the INCORRECT sentence in the system:',
+    options: [
+      "We will lay them off.",
+      "We will wipe out it.",
+      "We will carry it out."
+    ],
+    answer: 1,
+    explanation: '"We will wipe out it." ❌ MALWARE DETECTED — violates Directive 1! Correct: "We will wipe IT out." — pronoun must go in the MIDDLE of a 2-word verb.'
   },
+  // ── Q19: Noun Protocol ──
   {
     id: 'r3p8',
     round: 3,
     type: "mcq",
-    topic: "Cultural disadvantage",
-    question: 'Local traditions and arts disappearing due to global pop culture spreading is an example of:',
+    topic: "Noun Protocol",
+    question: '[Noun Protocol] If the object is a normal noun like "the mission" (NOT a pronoun), what is the rule for a 2-word verb?',
     options: [
-      "Cultural exchange",
-      "Cultural uniformity threatening local identity",
-      "International cooperation",
-      "Economic development"
+      "Carry out the mission. (At the end)",
+      "Carry the mission out. (In the middle)",
+      "Both A and B are correct!"
     ],
-    answer: 1,
-    explanation: "Toàn cầu hóa có thể xóa bỏ văn hóa địa phương khi văn hóa đại chúng toàn cầu lan rộng."
+    answer: 2,
+    explanation: 'With a regular NOUN object, BOTH positions are correct for separable 2-word verbs: "Carry out the mission" ✅ AND "Carry the mission out" ✅. Only PRONOUNS MUST go in the middle!'
   },
+  // ── Q20: Vocabulary — run out of ──
   {
     id: 'r3p9',
     round: 3,
     type: "mcq",
-    topic: "PRO globalization argument",
-    question: "Which is the STRONGEST PRO-globalization argument from the unit?",
+    topic: "Vocabulary File",
+    question: '[Vocabulary File] The base has zero supplies left. Which phrase means "to have nothing left"?',
     options: [
-      "It leads to job losses in developed countries",
-      "It promotes cultural uniformity",
-      "It raises living standards and reduces poverty globally",
-      "It increases the power of multinational corporations only"
+      "Run out of",
+      "Come down with"
     ],
-    answer: 2,
-    explanation: "PRO: Tăng mức sống và giảm nghèo toàn cầu là luận điểm mạnh nhất ủng hộ toàn cầu hóa."
+    answer: 0,
+    explanation: '"Run out of" = hết sạch, không còn gì. Ex: "We\'ve run out of ammunition!" "Come down with" = mắc bệnh — different meaning!'
   },
-  // ── Nhóm 3: Context & Application ──
+  // ── Q21: Economics — Prosperity ──
   {
     id: 'r3p10',
     round: 3,
     type: "mcq",
-    topic: "ANTI argument",
-    question: "Which argument would an ANTI-globalization speaker use MOST effectively?",
+    topic: "Economics File",
+    question: '[Economics File] What is the definition of "Prosperity"?',
     options: [
-      "Globalization creates jobs in developing countries",
-      "Multinational corporations exploit cheap labor and damage local industries",
-      "Technology spreads faster thanks to globalization",
-      "People can travel and work abroad more freely"
+      "Economic success and great wealth.",
+      "Extreme poverty and a failing economy."
     ],
-    answer: 1,
-    explanation: "ANTI: Các tập đoàn đa quốc gia bóc lột lao động giá rẻ và phá hoại công nghiệp địa phương là lập luận phản đối mạnh nhất."
+    answer: 0,
+    explanation: '"Prosperity" = sự thịnh vượng — trạng thái kinh tế thành công và giàu có. Opposite: poverty (nghèo khó).'
   },
+  // ── Q22: Economics — Standard of living ──
   {
     id: 'r3p11',
     round: 3,
     type: "mcq",
-    topic: "Counter-argument technique",
-    question: 'In a debate, after stating the opposing side\'s view, you should start your counter-argument with:',
+    topic: "Economics File",
+    question: '[Economics File] The level of wealth, comfort, and goods available to a citizen is their:',
     options: [
-      '"Furthermore,"',
-      '"However,"',
-      '"In addition,"',
-      '"Similarly,"'
+      "Investment",
+      "Standard of living"
     ],
     answer: 1,
-    explanation: '"However" = tuy nhiên. Dùng để chuyển từ luận điểm đối lập sang phản luận của mình.'
+    explanation: '"Standard of living" = mức sống — mức độ giàu có, tiện nghi và hàng hóa mà một người dân có thể tiếp cận được.'
   },
+  // ── Q23: Economics — Unemployment rate ──
   {
     id: 'r3p12',
     round: 3,
-    type: "fillin",
-    topic: "Key debate word",
-    question: 'While globalization creates jobs in some areas, it can cause ___________ in others as factories move abroad.',
-    blankBefore: "While globalization creates jobs in some areas, it can cause",
-    blankAfter: "in others as factories move abroad.",
-    answer: "unemployment",
-    hintLetters: ["u"],
-    explanation: "Unemployment = thất nghiệp. Hệ quả tiêu cực khi các nhà máy chuyển sang nước có lao động rẻ hơn."
+    type: "mcq",
+    topic: "Economics File",
+    question: '[Economics File] The percentage of people who DO NOT have a job is the:',
+    options: [
+      "Unemployment rate",
+      "Employment rate"
+    ],
+    answer: 0,
+    explanation: '"Unemployment rate" = tỷ lệ thất nghiệp — % người KHÔNG có việc làm. "Employment rate" = tỷ lệ có việc làm (opposite).'
   },
+  // ── Q24: Economics — Wages ──
   {
     id: 'r3p13',
     round: 3,
     type: "mcq",
-    topic: "Globalization & Environment",
-    question: "One environmental CON of globalization mentioned in the unit is:",
+    topic: "Economics File",
+    question: '[Economics File] Money paid regularly (hourly/weekly) for work is called:',
     options: [
-      "Faster communication between countries",
-      "Increased carbon emissions from international shipping and production",
-      "Higher quality goods for consumers",
-      "Easier access to clean energy technology"
+      "Infrastructure",
+      "Wages"
     ],
     answer: 1,
-    explanation: "Vận chuyển hàng hóa quốc tế và sản xuất toàn cầu làm tăng lượng khí thải carbon."
+    explanation: '"Wages" = tiền lương — tiền được trả đều đặn (theo giờ/tuần) cho công việc. "Infrastructure" = cơ sở hạ tầng — completely different!'
   },
+  // ── Q25: Audio Analysis — Rising intonation ──
   {
     id: 'r3p14',
     round: 3,
     type: "mcq",
-    topic: "Globalization benefits",
-    question: "Which of these is a social BENEFIT of globalization?",
+    topic: "Audio Analysis — Intonation",
+    question: '[Audio Analysis] If an agent asks a Tag Question and their voice goes UP (Rising Intonation ↗): "You\'re from London, aren\'t you? ↗" — it means:',
     options: [
-      "More cultural uniformity worldwide",
-      "Exploitation of workers in poorer countries",
-      "Greater cultural exchange and understanding between nations",
-      "Loss of traditional local practices"
+      "They are not sure and really want to know the answer.",
+      "They are 100% sure."
     ],
-    answer: 2,
-    explanation: "Trao đổi văn hóa và hiểu biết lẫn nhau giữa các quốc gia là lợi ích xã hội quan trọng."
+    answer: 0,
+    explanation: 'Rising intonation (↗) in tag questions = GENUINE QUESTION — the speaker is NOT sure and wants confirmation. They are asking sincerely!'
   },
-  // ── Nhóm 4: True / False style & advanced ──
+  // ── Q26: Audio Analysis — Falling intonation ──
   {
     id: 'r3p15',
     round: 3,
     type: "mcq",
-    topic: "Multinational corporations",
-    question: 'A multinational corporation (MNC) is a company that:',
+    topic: "Audio Analysis — Intonation",
+    question: '[Audio Analysis] If an agent\'s voice goes DOWN (Falling Intonation ↘): "It\'s cold today, isn\'t it? ↘" — it means:',
     options: [
-      "Only sells products in its home country",
-      "Is owned by more than two governments",
-      "Operates in multiple countries across the world",
-      "Trades only between two neighboring countries"
+      "They have no idea.",
+      "They already know it\'s true and expect you to agree."
     ],
-    answer: 2,
-    explanation: "MNC = tập đoàn đa quốc gia, hoạt động kinh doanh tại nhiều quốc gia trên thế giới."
+    answer: 1,
+    explanation: 'Falling intonation (↘) in tag questions = STATEMENT seeking agreement — the speaker already KNOWS the answer and just expects confirmation!'
   },
+  // ── Q27: Comm Strategy — You'd think ──
   {
     id: 'r3p16',
     round: 3,
     type: "mcq",
-    topic: "Globalization & inequality",
-    question: '"The benefits of globalization are NOT equally shared." This is an argument:',
+    topic: "Comm Strategy",
+    question: '[Comm Strategy] You are disappointed with old technology. Which phrase expresses frustration in this modern age?',
     options: [
-      "PRO globalization",
-      "ANTI globalization",
-      "Neutral / statistical observation",
-      "Not related to globalization"
+      "You\'d think... (in this modern age, they would fix this!)",
+      "Well, that\'s another story."
     ],
-    answer: 1,
-    explanation: "Lợi ích không được chia sẻ đều = bất bình đẳng, đây là lập luận CHỐNG toàn cầu hóa."
+    answer: 0,
+    explanation: '"You\'d think..." = Người ta sẽ nghĩ rằng... — dùng để bày tỏ sự thất vọng vì điều gì đó lẽ ra phải được cải thiện nhưng chưa được.'
   },
+  // ── Q28: Comm Strategy — That's another story ──
   {
     id: 'r3p17',
     round: 3,
-    type: "fillin",
-    topic: "Key term",
-    question: 'The process of countries becoming more open to international trade and investment is called ___________.',
-    blankBefore: "The process of countries becoming more open to international trade and investment is called",
-    blankAfter: ".",
-    answer: "globalization",
-    hintLetters: ["g"],
-    explanation: "Globalization = toàn cầu hóa. Khái niệm trung tâm của Unit 10."
+    type: "mcq",
+    topic: "Comm Strategy",
+    question: '[Comm Strategy] You want to acknowledge that you are smoothly changing the subject of the conversation. You say:',
+    options: [
+      "But on the bright side...",
+      "Well, that\'s another story."
+    ],
+    answer: 1,
+    explanation: '"Well, that\'s another story" = À, đó lại là chuyện khác rồi — dùng để chuyển chủ đề một cách tự nhiên, nhận thức được sự thay đổi.'
   },
+  // ── Q29: Comm Strategy — It just goes to show ──
   {
     id: 'r3p18',
     round: 3,
     type: "mcq",
-    topic: "Debate structure",
-    question: "In the Lesson 3 debate, the PRO side's MAIN argument was that globalization:",
+    topic: "Comm Strategy",
+    question: '[Comm Strategy] You want to emphasize a point or prove that you were right all along. You say:',
     options: [
-      "Destroys local cultures and languages",
-      "Creates unfair competition for small businesses",
-      "Promotes economic growth and raises living standards",
-      "Increases dependency on foreign countries"
+      "It just goes to show you...",
+      "Can you believe..."
     ],
-    answer: 2,
-    explanation: "PRO team chính luận: Toàn cầu hóa thúc đẩy tăng trưởng kinh tế và nâng cao mức sống."
+    answer: 0,
+    explanation: '"It just goes to show you..." = Điều đó chứng tỏ rằng... — dùng để nhấn mạnh một điểm hoặc chứng minh rằng bạn đã đúng từ đầu.'
   },
+  // ── Q30: Identify Malware — Final Firewall ──
   {
     id: 'r3p19',
     round: 3,
     type: "mcq",
-    topic: "Concession language",
-    question: 'Which phrase is used to CONCEDE a point before giving a counter-argument?',
+    topic: "Final Firewall",
+    question: '[Identify Malware] Final Firewall Question! Which sentence is grammatically WRONG?',
     options: [
-      '"Absolutely not,"',
-      '"While it is true that... , however..."',
-      '"On the other hand... therefore..."',
-      '"In conclusion,"'
+      "I can\'t put up with the noise.",
+      "I can\'t put the noise up with."
     ],
     answer: 1,
-    explanation: '"While it is true that... however..." là cấu trúc nhượng bộ chuẩn trong debate và bài luận phản biện.'
+    explanation: '"I can\'t put the noise up with." ❌ MALWARE! Violates Directive 2 — "put up with" is a 3-word LOCKED verb. It can NEVER be separated. ✅ "I can\'t put up with the noise."'
   }
 ];
 
@@ -551,38 +544,38 @@ function buildSessionQuestions(round3Selected) {
   ];
 }
 
-// Legacy QUESTIONS array (uses first 5 Round 3 questions, overwritten at game start)
+// Legacy QUESTIONS array (uses first 10 Round 3 questions, overwritten at game start)
 let QUESTIONS = buildSessionQuestions(ROUND3_POOL.slice(0, 10));
 
 // Round metadata
 const ROUNDS = {
   1: {
     name: "Breaking News",
-    subtitle: "Phrasal Verbs & Global Issues",
+    subtitle: "Phrasal Verbs · Global Issues",
     icon: "📺",
     theme: "breaking-news",
-    funFact: "Starbucks hiện có hơn 35,000 cửa hàng tại hơn 80 quốc gia trên thế giới — bắt đầu từ một cửa hàng nhỏ ở Seattle năm 1971."
+    funFact: "Phrasal verbs are everywhere! Native English speakers use over 5,000 phrasal verbs in daily life. Mastering just 50 common ones can dramatically boost your fluency — verbs like 'come down with', 'lay off', and 'wipe out' appear in news headlines every single day."
   },
   2: {
     name: "Trade Floor",
-    subtitle: "Separable Phrasal Verbs & Economics",
+    subtitle: "Economics · Global Trade",
     icon: "📈",
     theme: "trade-floor",
-    funFact: "Việt Nam là một trong 10 nước xuất khẩu hàng đầu thế giới về cà phê, dệt may, và điện tử — toàn cầu hóa đã biến đổi nền kinh tế Việt Nam hoàn toàn trong 30 năm qua."
+    funFact: "Việt Nam là một trong 10 nước xuất khẩu hàng đầu thế giới về cà phê, dệt may, và điện tử — toàn cầu hóa đã biến đổi nền kinh tế Việt Nam hoàn toàn trong 30 năm qua. Fair-trade products now generate over $9 billion annually worldwide!"
   },
   3: {
     name: "Debate Stage",
-    subtitle: "Pros & Cons of Globalization",
+    subtitle: "AI Security Protocol · Grammar Firewall",
     icon: "⚖️",
     theme: "debate-arena",
-    funFact: "Theo World Bank, toàn cầu hóa đã giúp hơn 1 tỷ người thoát khỏi đói nghèo từ 1990 đến 2015 — nhưng đồng thời, 1% người giàu nhất thế giới sở hữu nhiều tài sản hơn 50% dân số còn lại cộng lại."
+    funFact: "In English, separable phrasal verbs (like 'wipe out', 'lay off') follow a strict pronoun rule: the pronoun MUST go in the MIDDLE — never at the end! But 3-word phrasal verbs (like 'put up with') are completely LOCKED — they can never be split apart."
   },
   4: {
     name: "Culture Shock",
-    subtitle: "4 Stages & Adaptation",
+    subtitle: "Adaptation · Idioms · Debate",
     icon: "🌏",
     theme: "culture-shock",
-    funFact: "Nhà tâm lý học Kalervo Oberg là người đầu tiên mô tả 'culture shock' vào năm 1960. Ngày nay, các chương trình du học đều bắt buộc training về 4 giai đoạn này trước khi học sinh lên đường."
+    funFact: "Nhà tâm lý học Kalervo Oberg là người đầu tiên mô tả 'culture shock' vào năm 1960. Idioms like 'fish out of water', 'pulling someone's leg', and 'sitting on the fence' are used every day — even by native speakers who don't realize they're using figurative language!"
   }
 };
 

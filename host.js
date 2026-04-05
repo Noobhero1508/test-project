@@ -147,6 +147,13 @@ function renderHostQuestion(q) {
   if (q.type === 'mcq') {
     const grid = document.createElement('div');
     grid.className = 'host-mcq-grid';
+    // Support variable option counts (2, 3, or 4)
+    const optCount = q.options.length;
+    if (optCount <= 2) {
+      grid.style.gridTemplateColumns = '1fr 1fr';
+    } else if (optCount === 3) {
+      grid.style.gridTemplateColumns = '1fr 1fr 1fr';
+    }
     const letters = ['A', 'B', 'C', 'D'];
     q.options.forEach((opt, i) => {
       const btn = document.createElement('div');

@@ -342,7 +342,11 @@ function loadQuestion(qIdx) {
 // ─── Build Header per Round ───
 function buildHeader(round, qIdx, q) {
   const header = document.getElementById('q-header');
-  const qInRound = qIdx - (round - 1) * 5;
+  // R1: 0-4, R2: 5-9, R3: 10-19, R4: 20-24
+  let qInRound = qIdx;
+  if (round === 2) qInRound = qIdx - 5;
+  else if (round === 3) qInRound = qIdx - 10;
+  else if (round === 4) qInRound = qIdx - 20;
 
   if (round === 1) {
     header.innerHTML = `
@@ -500,6 +504,16 @@ function setupMCQ(q) {
   const grid = document.getElementById('q-options');
   const letters = ['A', 'B', 'C', 'D'];
   grid.innerHTML = '';
+
+  // Support 2, 3 or 4 options dynamically
+  const optCount = q.options.length;
+  if (optCount <= 2) {
+    grid.style.gridTemplateColumns = '1fr 1fr';
+  } else if (optCount === 3) {
+    grid.style.gridTemplateColumns = '1fr 1fr 1fr';
+  } else {
+    grid.style.gridTemplateColumns = '';
+  }
 
   q.options.forEach((opt, i) => {
     const btn = document.createElement('button');
