@@ -561,7 +561,7 @@ const ROUNDS = {
     subtitle: "Economics · Global Trade",
     icon: "📈",
     theme: "trade-floor",
-    funFact: "Việt Nam là một trong 10 nước xuất khẩu hàng đầu thế giới về cà phê, dệt may, và điện tử — toàn cầu hóa đã biến đổi nền kinh tế Việt Nam hoàn toàn trong 30 năm qua. Fair-trade products now generate over $9 billion annually worldwide!"
+    funFact: "Vietnam is one of the world's top 10 exporters of coffee, textiles, and electronics — globalization has completely transformed Vietnam's economy in the past 30 years. Fair-trade products now generate over $9 billion annually worldwide!"
   },
   3: {
     name: "Debate Stage",
@@ -575,7 +575,7 @@ const ROUNDS = {
     subtitle: "Adaptation · Idioms · Debate",
     icon: "🌏",
     theme: "culture-shock",
-    funFact: "Nhà tâm lý học Kalervo Oberg là người đầu tiên mô tả 'culture shock' vào năm 1960. Idioms like 'fish out of water', 'pulling someone's leg', and 'sitting on the fence' are used every day — even by native speakers who don't realize they're using figurative language!"
+    funFact: "Psychologist Kalervo Oberg was the first person to describe 'culture shock' in 1960. Idioms like 'fish out of water', 'pulling someone's leg', and 'sitting on the fence' are used every day — even by native speakers who don't realize they're using figurative language!"
   }
 };
 

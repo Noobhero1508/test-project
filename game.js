@@ -531,11 +531,13 @@ function selectMCQ(idx, q) {
 
   const isCorrect = idx === q.answer;
   const elapsed = TOTAL_TIME - timeLeft;
+  const isRound3 = q.round === 3;
 
   // Style buttons
   document.querySelectorAll('.option-btn').forEach((btn, i) => {
     btn.classList.add('disabled');
-    if (i === q.answer) btn.classList.add('correct');
+    // Only highlight correct answer if: correct answer chosen, OR round 3 (always show)
+    if (i === q.answer && (isCorrect || isRound3)) btn.classList.add('correct');
     if (i === idx && !isCorrect) btn.classList.add('wrong');
   });
 
@@ -555,7 +557,7 @@ function selectMCQ(idx, q) {
     score += earned;
 
     // Team scoring for Round 3
-    if (q.round === 3 && playerTeam) {
+    if (isRound3 && playerTeam) {
       teamScore += earned;
       db.ref('players/' + playerId).update({ teamScore: teamScore });
     }
@@ -569,8 +571,14 @@ function selectMCQ(idx, q) {
     streak = 0;
   }
 
-  // Show feedback
-  showFeedback(isCorrect, earned, q.explanation);
+  // Show feedback — Round 3 always shows correct answer; Rounds 1/2/4 hide it on wrong
+  if (isRound3) {
+    const correctAnswerText = !isCorrect ? q.options[q.answer] : null;
+    showFeedback(isCorrect, earned, q.explanation, correctAnswerText);
+  } else {
+    // Rounds 1, 2, 4: don't reveal correct answer on wrong
+    showFeedback(isCorrect, earned, isCorrect ? q.explanation : 'Wait for Commander Atlas to reveal the answer...');
+  }
 
   // Update Firebase
   saveAnswer(q.id, isCorrect, elapsed * 1000, q.options ? q.options[idx] : '');
@@ -578,6 +586,17 @@ function selectMCQ(idx, q) {
   stopTimer();
   updateStreakBadge();
   document.getElementById('score-display').textContent = score.toLocaleString();
+
+  // Round 3 auto-advance: correct = 3s, wrong = 5s
+  if (isRound3) {
+    const delay = isCorrect ? 3000 : 5000;
+    setTimeout(() => {
+      // Check if host has already moved to next question
+      // The session listener will handle the actual navigation
+      // We just need to signal readiness
+      db.ref('players/' + playerId + '/r3ready').set(true);
+    }, delay);
+  }
 }
 
 // ─── Setup Fill-In ───
@@ -618,6 +637,7 @@ function submitFillIn() {
   const isCorrect = checkFillIn(val, q.answer);
   const elapsed = TOTAL_TIME - timeLeft;
   const blank = document.getElementById('fi-blank');
+  const isRound3 = q.round === 3;
 
   if (isCorrect) {
     blank.textContent = q.answer;
@@ -638,7 +658,7 @@ function submitFillIn() {
     score += earned;
 
     // Team scoring for Round 3
-    if (q.round === 3 && playerTeam) {
+    if (isRound3 && playerTeam) {
       teamScore += earned;
       db.ref('players/' + playerId).update({ teamScore: teamScore });
     }
@@ -651,19 +671,38 @@ function submitFillIn() {
 
     showFeedback(true, earned, q.explanation);
   } else {
-    blank.textContent = q.answer;
-    blank.style.borderColor = '#ef5350';
-    blank.style.color = '#ef5350';
+    // Round 3: show the correct answer; Rounds 1/2/4: hide it
+    if (isRound3) {
+      blank.textContent = q.answer;
+      blank.style.borderColor = '#ef5350';
+      blank.style.color = '#ef5350';
+    } else {
+      blank.textContent = '???';
+      blank.style.borderColor = '#ef5350';
+      blank.style.color = '#ef5350';
+    }
     input.parentElement.classList.add('shake');
     streak = 0;
 
-    showFeedback(false, 0, q.explanation, q.answer);
+    if (isRound3) {
+      showFeedback(false, 0, q.explanation, q.answer);
+    } else {
+      showFeedback(false, 0, 'Wait for Commander Atlas to reveal the answer...');
+    }
   }
 
   saveAnswer(q.id, isCorrect, elapsed * 1000, val);
   stopTimer();
   updateStreakBadge();
   document.getElementById('score-display').textContent = score.toLocaleString();
+
+  // Round 3 auto-advance
+  if (isRound3) {
+    const delay = isCorrect ? 3000 : 5000;
+    setTimeout(() => {
+      db.ref('players/' + playerId + '/r3ready').set(true);
+    }, delay);
+  }
 }
 
 function checkFillIn(userInput, correctAnswer) {
@@ -719,14 +758,20 @@ function showFeedback(isCorrect, earned, explanation, correctAnswer) {
   }
 }
 
-function showTimeoutFeedback() {
+function showTimeoutFeedback(revealAnswer) {
   const q = QUESTIONS[currentQ];
   const box = document.getElementById('feedback-box');
   box.classList.remove('hidden', 'correct', 'wrong', 'timeout');
   box.classList.add('timeout');
 
-  const answer = q.type === 'fillin' ? q.answer : q.options[q.answer];
-  box.innerHTML = `⏰ Time's up! The answer is: <strong>${answer}</strong><br><small>${q.explanation}</small>`;
+  if (revealAnswer) {
+    // Round 3: show the correct answer
+    const answer = q.type === 'fillin' ? q.answer : q.options[q.answer];
+    box.innerHTML = `⏰ Time's up! The answer is: <strong>${answer}</strong><br><small>${q.explanation}</small>`;
+  } else {
+    // Rounds 1, 2, 4: don't reveal the answer
+    box.innerHTML = `⏰ Time's up! Wait for Commander Atlas to reveal the answer...`;
+  }
 }
 
 // ─── Timer ───
@@ -761,23 +806,39 @@ function handleTimeout() {
   streak = 0;
 
   const q = QUESTIONS[currentQ];
+  const isRound3 = q.round === 3;
+
   if (q.type === 'mcq') {
     document.querySelectorAll('.option-btn').forEach((btn, i) => {
       btn.classList.add('disabled');
-      if (i === q.answer) btn.classList.add('correct');
+      // Only highlight correct on timeout for Round 3
+      if (i === q.answer && isRound3) btn.classList.add('correct');
     });
   } else {
     const blank = document.getElementById('fi-blank');
-    blank.textContent = q.answer;
-    blank.style.borderColor = '#ffd54f';
-    blank.style.color = '#ffd54f';
+    if (isRound3) {
+      blank.textContent = q.answer;
+      blank.style.borderColor = '#ffd54f';
+      blank.style.color = '#ffd54f';
+    } else {
+      blank.textContent = '???';
+      blank.style.borderColor = '#ffd54f';
+      blank.style.color = '#ffd54f';
+    }
     document.getElementById('fi-input').disabled = true;
     document.getElementById('fi-submit').disabled = true;
   }
 
-  showTimeoutFeedback();
+  showTimeoutFeedback(isRound3);
   saveAnswer(q.id, false, TOTAL_TIME * 1000, '');
   updateStreakBadge();
+
+  // Round 3 auto-advance on timeout (5s)
+  if (isRound3) {
+    setTimeout(() => {
+      db.ref('players/' + playerId + '/r3ready').set(true);
+    }, 5000);
+  }
 }
 
 function updateTimerDisplay() {
