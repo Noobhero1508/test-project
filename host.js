@@ -13,6 +13,8 @@ let playersRef = db.ref('players');
 let r3BattleInterval = null;
 let r3CountdownInterval = null;
 let r3CountdownSeconds = 180; // 3 minutes
+let r3BonusAwarded = false;   // team completion bonus awarded flag
+let r3CompletionListenerActive = false;
 
 // ─── Initialize Session ───────────────────────────────────
 function initSession() {
@@ -24,7 +26,8 @@ function initSession() {
     currentRound: 1,
     timerStart: 0,
     showAnswer: false,
-    round3Questions: null
+    round3Questions: null,
+    round3Seed: null
   }).catch(err => {
     console.error('[HOST] Error initializing session:', err);
     alert('Firebase connection failed! Check your database URL and rules.');
@@ -42,7 +45,7 @@ function initSession() {
     grid.innerHTML = '';
     Object.values(players).forEach(p => {
       const chip = document.createElement('span');
-      chip.className = 'hp-chip';
+      chip.className = 'player-chip';
       chip.textContent = p.name;
       grid.appendChild(chip);
     });
@@ -56,6 +59,9 @@ function initSession() {
       updateRound4Leaderboard(players);
     }
   }, err => console.error('[HOST] Error listening to players:', err));
+
+  // Play lobby music
+  loadAndPlayTrack('sanh.mp3', 'Building Contraptions', true);
 }
 
 // ─── Update Status Indicator ─────────────────────────────
@@ -69,9 +75,17 @@ function updateHostStatus(status) {
     between_rounds: 'BETWEEN ROUNDS',
     team_selection: 'TEAM SELECTION',
     team_results: 'TEAM RESULTS',
+    r3_reveal: 'REVEAL',
     ended: 'GAME ENDED'
   };
   text.textContent = labels[status] || status.toUpperCase();
+
+  // Update round badge
+  const badge = document.getElementById('host-round-badge');
+  if (badge && hostCurrentRound >= 1) {
+    const roundNames = { 1: 'R1 · BREAKING NEWS', 2: 'R2 · TRADE FLOOR', 3: 'R3 · DEBATE ARENA', 4: 'R4 · CULTURE SHOCK' };
+    badge.textContent = roundNames[hostCurrentRound] || 'ROUND ' + hostCurrentRound;
+  }
 }
 
 // ─── Start Game ──────────────────────────────────────────
@@ -94,13 +108,15 @@ function hostStartGame() {
     currentRound: 1,
     timerStart: firebase.database.ServerValue.TIMESTAMP,
     showAnswer: false,
-    round3Questions: r3Ids
+    round3Questions: r3Ids,
+    round3Seed: Date.now()
   });
 
   updateHostStatus('playing');
   document.getElementById('host-lobby').classList.add('hidden');
   document.getElementById('host-game').classList.remove('hidden');
 
+  loadAndPlayTrack('Harvest Moon _ Story of Seasons_ BtN _ FoMT - Town Theme [Remix] [YtxZCvAM8pI].mp3', 'Harvest Moon', true);
   loadHostQuestion(0);
 }
 
@@ -128,8 +144,8 @@ function loadHostQuestion(qIdx) {
   // Update stats
   updateAnswerStats(qIdx);
 
-  // Enable buttons
-  document.getElementById('host-next-btn').disabled = false;
+  // Enable buttons (but disable host‑next in Round 3)
+  document.getElementById('host-next-btn').disabled = round === 3; // host does not control progression in Round 3
   document.getElementById('host-reveal-btn').disabled = false;
 
   // Round 4: show badge on leaderboard
@@ -140,6 +156,7 @@ function loadHostQuestion(qIdx) {
     badge.classList.add('hidden');
   }
 }
+
 
 // ─── Render question (MCQ or Fill-in) without answer ─────
 function renderHostQuestion(q) {
@@ -219,6 +236,7 @@ function updateAnswerStats(qIdx) {
 
   playersRef.once('value', snap => {
     const players = snap.val() || {};
+    const totalPlayers = Object.keys(players).length;
     let totalAnswered = 0, correctCount = 0, totalTime = 0;
 
     Object.values(players).forEach(p => {
@@ -231,11 +249,19 @@ function updateAnswerStats(qIdx) {
       }
     });
 
+    // Update answer progress bar
+    const countEl = document.getElementById('answer-count');
+    const totalEl = document.getElementById('answer-total');
+    const fillEl = document.getElementById('answer-progress-fill');
+    if (countEl) countEl.textContent = totalAnswered;
+    if (totalEl) totalEl.textContent = totalPlayers;
+    if (fillEl) fillEl.style.width = (totalPlayers > 0 ? Math.round(totalAnswered / totalPlayers * 100) : 0) + '%';
+
     const statsEl = document.getElementById('host-q-stats');
     if (totalAnswered > 0) {
       const pct = Math.round((correctCount / totalAnswered) * 100);
       const avgTime = (totalTime / totalAnswered / 1000).toFixed(1);
-      const statsText = `${totalAnswered} answered · ${pct}% correct · Avg ${avgTime}s`;
+      const statsText = `${totalAnswered}/${totalPlayers} answered · ${pct}% correct · Avg ${avgTime}s`;
       if (statsEl) statsEl.innerHTML = statsText;
 
       // Also update Round 3 battle stats
@@ -247,12 +273,20 @@ function updateAnswerStats(qIdx) {
   });
 }
 
-// Refresh stats every 2s
+// Refresh stats every 2s (safety net)
 setInterval(() => {
   if (hostCurrentQ >= 0 && QUESTIONS[hostCurrentQ]) {
     updateAnswerStats(hostCurrentQ);
   }
 }, 2000);
+
+// ─── Real-time Answer Stats Listener ────────────────────
+// Fires whenever ANY player data changes, keeping ANSWERS RECEIVED live
+playersRef.on('value', () => {
+  if (hostCurrentQ >= 0 && QUESTIONS[hostCurrentQ]) {
+    updateAnswerStats(hostCurrentQ);
+  }
+});
 
 // ─── Next Question ───────────────────────────────────────
 function hostNextQuestion() {
@@ -272,8 +306,9 @@ function hostNextQuestion() {
   if (newRound !== prevRound) {
     // Round transition
     if (prevRound === 3) {
-      clearR3AutoAdvance();
-      showHostTeamResults();
+      // Always show daddy reveal first (then host clicks to team results)
+      stopR3BattleUpdates();
+      showDaddyReveal();
       return;
     }
     showHostFunFact(prevRound);
@@ -296,8 +331,6 @@ function hostNextQuestion() {
     // Reset reveal btn
     const r3Rev = document.getElementById('r3-reveal-btn');
     if (r3Rev) r3Rev.disabled = false;
-    // Restart auto-advance for next Round 3 question
-    startR3AutoAdvance();
   } else {
     loadHostQuestion(hostCurrentQ);
   }
@@ -315,7 +348,7 @@ function showHostFunFact(round) {
 
   const r = ROUNDS[round];
   const titleEl = document.getElementById('host-funfact-title');
-  const bodyEl  = document.getElementById('host-funfact-text');
+  const bodyEl = document.getElementById('host-funfact-text');
 
   if (r && r.funFactTitle) {
     titleEl.textContent = r.funFactTitle;
@@ -324,7 +357,19 @@ function showHostFunFact(round) {
     titleEl.textContent = '';
     titleEl.classList.add('hidden');
   }
-  if (r) bodyEl.textContent = r.funFactBody;
+
+  // Typewriter effect for fun fact text
+  if (r && r.funFactBody) {
+    const fullText = r.funFactBody;
+    bodyEl.textContent = '';
+    let i = 0;
+    if (window._hostFunFactTimer) clearInterval(window._hostFunFactTimer);
+    window._hostFunFactTimer = setInterval(() => {
+      bodyEl.textContent += fullText[i];
+      i++;
+      if (i >= fullText.length) clearInterval(window._hostFunFactTimer);
+    }, 25);
+  }
 }
 
 // ─── Continue to Next Round ──────────────────────────────
@@ -378,52 +423,117 @@ function startHostTeamListener() {
   });
 }
 
-// ─── Round 3 Auto-advance Timer ──────────────────────────
-let r3AutoTimer = null;
+// ─── Round 3 Team Completion Detection ──────────────────────
+const R3_PLAYER_BONUS = 500;   // pts per player in winning team
+const R3_TEAM_BONUS = 1000;  // pts added to each member's teamScore
 
-function startR3AutoAdvance() {
-  clearR3AutoAdvance();
-  // Auto-advance after 25s (timer 20s + 5s buffer for wrong answers)
-  r3AutoTimer = setTimeout(() => {
-    hostNextQuestion();
-  }, 25000);
+function startR3CompletionListener() {
+  if (r3CompletionListenerActive) return;
+  r3CompletionListenerActive = true;
+  r3BonusAwarded = false;
+
+  playersRef.on('value', snap => {
+    if (r3BonusAwarded) return;
+    const players = snap.val() || {};
+    checkR3TeamCompletion(players);
+  });
 }
 
-function clearR3AutoAdvance() {
-  if (r3AutoTimer) {
-    clearTimeout(r3AutoTimer);
-    r3AutoTimer = null;
+function checkR3TeamCompletion(players) {
+  // Separate players by team — only consider players who have a team
+  const proPlayers = Object.entries(players).filter(([, p]) => p.team === 'pro');
+  const antiPlayers = Object.entries(players).filter(([, p]) => p.team === 'anti');
+
+  if (proPlayers.length === 0 && antiPlayers.length === 0) return;
+
+  const proFinished = proPlayers.length > 0 && proPlayers.every(([, p]) => p.r3finished === true);
+  const antiFinished = antiPlayers.length > 0 && antiPlayers.every(([, p]) => p.r3finished === true);
+
+  if (!proFinished && !antiFinished) return;
+
+  // Award bonus — if both finish at the same time, both get it
+  r3BonusAwarded = true;
+
+  const teamsToAward = [];
+  if (proFinished) teamsToAward.push({ team: 'pro', members: proPlayers });
+  if (antiFinished) teamsToAward.push({ team: 'anti', members: antiPlayers });
+
+  teamsToAward.forEach(({ team, members }) => {
+    // Update each member's score and teamScore in Firebase
+    members.forEach(([id, p]) => {
+      const newScore = (p.score || 0) + R3_PLAYER_BONUS;
+      const newTeamScore = (p.teamScore || 0) + R3_TEAM_BONUS;
+      db.ref('players/' + id).update({
+        score: newScore,
+        teamScore: newTeamScore
+      });
+    });
+
+    // Write bonus signal to Firebase so players can display notification
+    sessionRef.update({
+      r3TeamBonus: {
+        team: team,
+        playerBonus: R3_PLAYER_BONUS,
+        teamBonus: R3_TEAM_BONUS,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      }
+    });
+  });
+
+  // Display on host dashboard
+  const bothFinished = proFinished && antiFinished;
+  const winningTeam = bothFinished ? 'BOTH TEAMS' : (proFinished ? 'PRO GLOBALIZATION' : 'ANTI GLOBALIZATION');
+  showR3CompletionBonusNotif(winningTeam, bothFinished);
+}
+
+function showR3CompletionBonusNotif(teamName, both) {
+  // Inject or update a notification banner inside the battle view
+  let banner = document.getElementById('r3-completion-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'r3-completion-banner';
+    banner.style.cssText = `
+      margin:12px 0;padding:16px 24px;
+      background:linear-gradient(135deg,#1a2a1a,#0d180d);
+      border:2px solid #4caf50;border-radius:12px;
+      color:#4caf50;font-weight:700;font-size:18px;
+      text-align:center;animation:pulse 1.5s ease infinite;`;
+    const battleView = document.getElementById('host-round3-battle');
+    if (battleView) battleView.insertBefore(banner, battleView.firstChild);
   }
+  banner.innerHTML = both
+    ? `🏆 BOTH TEAMS finished R3! Each member: <span style="color:#fff">+${R3_PLAYER_BONUS} pts</span>`
+    : `🏆 <strong>${teamName}</strong> finished first! Each member: <span style="color:#fff">+${R3_PLAYER_BONUS} pts</span>`;
 }
 
 // ─── Start Round 3 (show battle view) ────────────────────
 function hostStartRound3() {
   teamListenerActive = false;
+  r3CompletionListenerActive = false; // reset so listener can re-attach
   document.getElementById('host-team-selection').classList.add('hidden');
 
   // Show battle view instead of normal game panel
   document.getElementById('host-round3-battle').classList.remove('hidden');
 
   hostCurrentRound = 3;
-  round3QuestionCount = 1;
-  const counter = document.getElementById('r3-q-counter');
-  if (counter) counter.textContent = `Question 1 / 10`;
 
+  // Broadcast R3 start — players will self-drive their questions
   sessionRef.update({
     status: 'playing',
-    currentQuestion: hostCurrentQ,
     currentRound: 3,
-    timerStart: firebase.database.ServerValue.TIMESTAMP,
-    showAnswer: false
+    r3TeamBonus: null   // clear any previous bonus
   });
 
   updateHostStatus('playing');
 
-  // Start live battle updates
+  // Start live battle score updates + countdown
   startR3BattleUpdates();
 
-  // Start auto-advance for Round 3
-  startR3AutoAdvance();
+  // Auto-play Round 3 music immediately (no pause feature for R3)
+  loadAndPlayTrack('round3.mp3', 'For the Defeated', true);
+
+  // Start watching for team completion
+  startR3CompletionListener();
 }
 
 // ─── Round 3 Battle View — Live Updates ─────────────────
@@ -462,7 +572,6 @@ function startR3Countdown() {
       clearInterval(r3CountdownInterval);
       r3CountdownInterval = null;
       // Time's up — auto-end Round 3
-      clearR3AutoAdvance();
       stopR3BattleUpdates();
       showDaddyReveal();
     }
@@ -519,6 +628,20 @@ function showDaddyReveal() {
       title.style.color = '#f44336';
       sub.textContent = 'The ANTI team dominated the debate!';
     }
+    // Fallback when local image files are unavailable.
+    img.onerror = () => {
+      const isWinLike = winner === 'tie' || winner === 'pro';
+      const bg = isWinLike ? '#103015' : '#350f10';
+      const fg = isWinLike ? '#4caf50' : '#f44336';
+      const text = encodeURIComponent(isWinLike ? 'DADDY LIKE' : 'DADDY PHAT');
+      img.src =
+        `data:image/svg+xml;utf8,` +
+        `<svg xmlns='http://www.w3.org/2000/svg' width='900' height='550'>` +
+        `<rect width='100%' height='100%' fill='${bg}'/>` +
+        `<text x='50%' y='46%' dominant-baseline='middle' text-anchor='middle' fill='${fg}' font-size='86' font-family='Arial' font-weight='700'>${text}</text>` +
+        `<text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff' font-size='34' font-family='Arial'>Round 3 Result</text>` +
+        `</svg>`;
+    };
 
     document.getElementById('host-round3-battle').classList.add('hidden');
     document.getElementById('host-daddy-reveal').classList.remove('hidden');
@@ -538,13 +661,13 @@ function updateR3Battle() {
     let proScore = 0, antiScore = 0;
     const proPlayers = [], antiPlayers = [];
 
-    Object.values(players).forEach(p => {
+    Object.entries(players).forEach(([id, p]) => {
       if (p.team === 'pro') {
         proScore += (p.teamScore || 0);
-        proPlayers.push({ name: p.name, score: p.teamScore || 0 });
+        proPlayers.push({ id, name: p.name, score: p.teamScore || 0, finished: !!p.r3finished });
       } else if (p.team === 'anti') {
         antiScore += (p.teamScore || 0);
-        antiPlayers.push({ name: p.name, score: p.teamScore || 0 });
+        antiPlayers.push({ id, name: p.name, score: p.teamScore || 0, finished: !!p.r3finished });
       }
     });
 
@@ -569,10 +692,8 @@ function updateR3Battle() {
     document.getElementById('r3-pro-count').textContent = proPlayers.length;
     document.getElementById('r3-anti-count').textContent = antiPlayers.length;
 
-    // Render PRO member list
+    // Render PRO member list (with completion status)
     const proCol = document.getElementById('r3-pro-members');
-    const proHeader = proCol.querySelector('.r3-col-header'); // keep header
-    // Remove existing rows
     proCol.querySelectorAll('.r3-member-row').forEach(r => r.remove());
     proPlayers.forEach((p, i) => {
       const row = document.createElement('div');
@@ -580,17 +701,19 @@ function updateR3Battle() {
       row.innerHTML = `
         <span class="r3-member-rank">${i + 1}</span>
         <span class="r3-member-name">${p.name}</span>
-        <span class="r3-member-score">${p.score.toLocaleString()}</span>`;
+        <span class="r3-member-score">${p.score.toLocaleString()}</span>
+        <span class="r3-member-status" title="${p.finished ? 'Finished' : 'In progress'}">${p.finished ? '✅' : '⏳'}</span>`;
       proCol.appendChild(row);
     });
 
-    // Render ANTI member list
+    // Render ANTI member list (with completion status)
     const antiCol = document.getElementById('r3-anti-members');
     antiCol.querySelectorAll('.r3-member-row').forEach(r => r.remove());
     antiPlayers.forEach((p, i) => {
       const row = document.createElement('div');
       row.className = 'r3-member-row anti-row';
       row.innerHTML = `
+        <span class="r3-member-status" title="${p.finished ? 'Finished' : 'In progress'}">${p.finished ? '✅' : '⏳'}</span>
         <span class="r3-member-score">${p.score.toLocaleString()}</span>
         <span class="r3-member-name">${p.name}</span>
         <span class="r3-member-rank">${i + 1}</span>`;
@@ -599,10 +722,9 @@ function updateR3Battle() {
   });
 }
 
-// ─── Show Team Results (after Round 3) ───────────────────
+// ─── Show Team Results (after Round 3) ─────────────────────
 function showHostTeamResults() {
   stopR3BattleUpdates();
-  clearR3AutoAdvance();
   sessionRef.update({ status: 'team_results' });
   updateHostStatus('team_results');
 
@@ -645,7 +767,13 @@ function showHostTeamResults() {
 
 // ─── Continue After Team Results → Round 4 ───────────────
 function hostContinueAfterTeam() {
+  // Force transition pointer to the first Round 4 question.
+  const firstRound4Idx = QUESTIONS.findIndex(q => q.round === 4);
+  if (firstRound4Idx !== -1) {
+    hostCurrentQ = firstRound4Idx;
+  }
   document.getElementById('host-team-results').classList.add('hidden');
+  loadAndPlayTrack('Harvest Moon _ Story of Seasons_ BtN _ FoMT - Town Theme [Remix] [YtxZCvAM8pI].mp3', 'Harvest Moon', true);
   showHostFunFact(3); // Show round 3 fun fact before round 4
 }
 
@@ -700,6 +828,8 @@ function endGame() {
   document.getElementById('host-funfact').classList.add('hidden');
   document.getElementById('host-final').classList.remove('hidden');
 
+  loadAndPlayTrack('GIAO HƯỞNG THANK ĐỘ - KillnTea _ OFFICIAL KARAOKE VERSION - (320 Kbps).mp3', 'Giao Hưởng Khô Gà', true);
+
   playersRef.once('value', snap => {
     const players = snap.val() || {};
     const sorted = Object.entries(players)
@@ -716,9 +846,9 @@ function endGame() {
 function buildPodium(sorted) {
   const podium = document.getElementById('host-podium');
   const placements = [
-    { idx: 1, cls: 'second', num: '🥈' },
-    { idx: 0, cls: 'first', num: '🥇' },
-    { idx: 2, cls: 'third', num: '🥉' }
+    { idx: 1, cls: 'second', num: '🥈', delay: 0.3 },
+    { idx: 0, cls: 'first', num: '🥇', delay: 0.8 },
+    { idx: 2, cls: 'third', num: '🥉', delay: 0.5 }
   ];
 
   podium.innerHTML = '';
@@ -728,12 +858,26 @@ function buildPodium(sorted) {
 
     const div = document.createElement('div');
     div.className = 'podium-place ' + p.cls;
+    div.style.animationDelay = p.delay + 's';
     div.innerHTML = `
       <div class="podium-num">${p.num}</div>
       <div class="podium-name">${player.name}</div>
       <div class="podium-score">${(player.score || 0).toLocaleString()} pts</div>`;
     podium.appendChild(div);
   });
+
+  // Confetti celebration for host podium!
+  if (typeof confetti === 'function') {
+    setTimeout(() => {
+      const end = Date.now() + 3000;
+      const colors = ['#ffd700', '#c0c0c0', '#cd7f32', '#ff6600', '#4caf50'];
+      (function frame() {
+        confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors });
+        confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+    }, 1200);
+  }
 }
 
 // ─── Full Ranking Table ───────────────────────────────────
@@ -816,3 +960,110 @@ function buildClassStats(sorted) {
 
 // ─── Init on Load ─────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', initSession);
+
+
+/* ═══════════════════════════════════════════════════════
+   MUSIC PLAYER SYSTEM
+   ═══════════════════════════════════════════════════════ */
+
+let _musicFadeTimer = null;
+let _musicIsPlaying = false;
+let _musicIsR3 = false; // R3 track — no pause button effect
+
+/** Load a new track and optionally auto-play it */
+function loadAndPlayTrack(src, label, autoPlay = false) {
+  const audio = document.getElementById('bg-music');
+  const trackEl = document.getElementById('mp-track');
+  if (!audio) return;
+
+  const wasPlaying = _musicIsPlaying;
+  // Stop current if playing
+  if (!audio.paused) {
+    audio.pause();
+    _musicIsPlaying = false;
+  }
+
+  audio.src = src;
+  if (trackEl) trackEl.textContent = label || src;
+
+  if (autoPlay) {
+    audio.volume = 0;
+    audio.play().then(() => {
+      _musicIsPlaying = true;
+      fadeInMusic();
+      updateMusicUI(true);
+    }).catch(e => console.warn('[MUSIC] Autoplay blocked:', e));
+  } else {
+    updateMusicUI(false);
+  }
+}
+
+/** Toggle play/pause with fade */
+function toggleMusic() {
+  const audio = document.getElementById('bg-music');
+  if (!audio || !audio.src || audio.src === window.location.href) return;
+
+  if (_musicIsPlaying) {
+    fadeOutMusic(() => {
+      audio.pause();
+      _musicIsPlaying = false;
+      updateMusicUI(false);
+    });
+  } else {
+    audio.play().then(() => {
+      _musicIsPlaying = true;
+      fadeInMusic();
+      updateMusicUI(true);
+    }).catch(e => console.warn('[MUSIC] Play failed:', e));
+  }
+}
+
+/** Fade volume from 0 → 1 over ~1.5s */
+function fadeInMusic(targetVol = 0.8) {
+  const audio = document.getElementById('bg-music');
+  if (!audio) return;
+  if (_musicFadeTimer) clearInterval(_musicFadeTimer);
+
+  audio.volume = 0;
+  const step = targetVol / 30; // 30 steps over 1.5s
+  _musicFadeTimer = setInterval(() => {
+    if (audio.volume + step >= targetVol) {
+      audio.volume = targetVol;
+      clearInterval(_musicFadeTimer);
+      _musicFadeTimer = null;
+    } else {
+      audio.volume = Math.min(1, audio.volume + step);
+    }
+  }, 50);
+}
+
+/** Fade volume from current → 0 over ~1.5s, then call callback */
+function fadeOutMusic(callback) {
+  const audio = document.getElementById('bg-music');
+  if (!audio) { if (callback) callback(); return; }
+  if (_musicFadeTimer) clearInterval(_musicFadeTimer);
+
+  const startVol = audio.volume;
+  const step = startVol / 30;
+  _musicFadeTimer = setInterval(() => {
+    if (audio.volume - step <= 0) {
+      audio.volume = 0;
+      clearInterval(_musicFadeTimer);
+      _musicFadeTimer = null;
+      if (callback) callback();
+    } else {
+      audio.volume = Math.max(0, audio.volume - step);
+    }
+  }, 50);
+}
+
+/** Update music widget UI to reflect play/pause state */
+function updateMusicUI(playing) {
+  const btn = document.getElementById('mp-play-btn');
+  const icon = document.getElementById('mp-icon');
+  const eq = document.getElementById('mp-eq');
+
+  if (btn) btn.textContent = playing ? '⏸' : '▶';
+  if (icon) icon.classList.toggle('playing', playing);
+  if (eq) eq.classList.toggle('paused', !playing);
+}

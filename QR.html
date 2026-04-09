@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scan QR - Global Agent Mission</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font), sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    
+    .host-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      z-index: 20;
+    }
+
+    .qr-container {
+      background: rgba(10, 10, 18, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 40px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.02);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+      text-align: center;
+      animation: qr-float 6s ease-in-out infinite;
+    }
+
+    @keyframes qr-float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .qr-title {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      margin-bottom: 24px;
+      color: var(--gold);
+      text-transform: uppercase;
+      text-shadow: 0 2px 10px rgba(212, 160, 23, 0.2);
+    }
+
+    .qr-image-wrapper {
+      background: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      display: inline-block;
+      box-shadow: 0 0 30px rgba(255,255,255,0.1);
+    }
+
+    .qr-image {
+      max-width: 320px;
+      display: block;
+    }
+
+    .qr-subtitle {
+      margin-top: 24px;
+      font-size: 16px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    /* Override status pill specifically for this page */
+    .status-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    .status-dot.waiting {
+      background: var(--gold);
+      box-shadow: 0 0 8px var(--gold);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER BAR ═══ -->
+<div class="host-bar">
+  <h1><span class="hb-globe">🌐</span> GLOBAL AGENT MISSION</h1>
+  <div class="host-status-area">
+    <div class="status-pill">
+      <span class="status-dot waiting"></span>
+      <span style="font-weight:700;letter-spacing:1px;font-size:12px;color:var(--text)">SCAN TO JOIN</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ QR CONTAINER ═══ -->
+<div class="qr-container">
+  <div class="qr-title">CONNECT TO MISSION</div>
+  <div class="qr-image-wrapper">
+    <img src="website_qrcode.png" alt="QR Code" class="qr-image">
+  </div>
+  <div class="qr-subtitle">Scan via smartphone to enter</div>
+</div>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script>
+  // Add floating particles similar to the interactive rounds
+  function createParticles() {
+    const config = { 
+      colors: ['#00ff88', '#00cc66', '#4caf50', '#81c784', '#0d1f11'], 
+      count: 45, 
+      sizeRange: [2, 8] 
+    };
+    
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'particles-container';
+    document.body.appendChild(particlesContainer);
+    
+    for (let i = 0; i < config.count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      
+      const size = config.sizeRange[0] + Math.random() * (config.sizeRange[1] - config.sizeRange[0]);
+      const color = config.colors[Math.floor(Math.random() * config.colors.length)];
+      const left = Math.random() * 100;
+      const duration = 10 + Math.random() * 15; 
+      const delay = Math.random() * duration;
+
+      p.style.cssText = \`
+        width: \${size}px; height: \${size}px;
+        background: \${color};
+        left: \${left}%;
+        animation-duration: \${duration}s;
+        animation-delay: -\${delay}s;
+      \`;
+      
+      particlesContainer.appendChild(p);
+    }
+  }
+
+  // Initialize
+  window.addEventListener('DOMContentLoaded', createParticles);
+</script>
+
+</body>
+</html>

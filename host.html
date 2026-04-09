@@ -5,412 +5,1077 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Host Control — Global Agent Mission</title>
   <meta name="description" content="Host control panel for the Global Agent Mission game.">
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    /* ── Host-specific overrides ── */
-    .host-q-display { display:flex; flex-direction:column; gap:12px; }
-    .host-mcq-grid  { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; }
-    .host-opt-btn   {
-      background:#1a1a2e; border:2px solid rgba(255,255,255,0.12);
-      border-radius:10px; padding:12px 16px; color:#fff; font-size:14px;
-      font-family:var(--mono,monospace); cursor:default; display:flex;
-      align-items:center; gap:10px; transition:all .3s; text-align:left;
+    :root {
+      --font: 'Inter', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --bg: #08080c;
+      --surface: rgba(255,255,255,0.04);
+      --surface-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.08);
+      --text: #eee;
+      --muted: #666;
+      --accent: #cc0000;
+      --green: #4caf50;
+      --red: #ef5350;
+      --gold: #d4a017;
+      --pink: #e491b0;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      height: 100vh;
+    }
+    .hidden { display: none !important; }
+
+    /* ═══════════════════════════════════════
+       HEADER BAR
+       ═══════════════════════════════════════ */
+    .host-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 32px;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border);
+      height: 56px;
+      position: relative;
+      z-index: 10;
+    }
+    .host-bar h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .host-bar h1 .hb-globe {
+      font-size: 22px;
+    }
+    .host-status-area {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .host-round-badge {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+    }
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      animation: pulse-dot 1.5s infinite;
+    }
+    .status-dot.waiting { background: #ffc107; }
+    .status-dot.playing { background: #4caf50; }
+    .status-dot.between_rounds { background: #2196f3; }
+    .status-dot.team_selection { background: #d4a017; }
+    .status-dot.team_results { background: #d4a017; }
+    .status-dot.r3_reveal { background: #d4a017; }
+    .status-dot.ended { background: #ef5350; }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ═══════════════════════════════════════
+       LOBBY
+       ═══════════════════════════════════════ */
+    .host-lobby {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: calc(100vh - 56px);
+      text-align: center;
+      gap: 24px;
+      padding: 40px;
+    }
+    .lobby-icon { font-size: 72px; animation: float 3s ease-in-out infinite; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    .lobby-title {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: 4px;
+      background: linear-gradient(135deg, #fff, #888);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .lobby-count {
+      font-size: 64px;
+      font-weight: 900;
+      font-family: var(--mono);
+      color: var(--accent);
+      line-height: 1;
+    }
+    .lobby-count-label {
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 3px;
+    }
+    .player-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      max-width: 800px;
+    }
+    .player-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 14px;
+      animation: chip-in 0.3s ease;
+    }
+    @keyframes chip-in {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .btn-start-game {
+      padding: 18px 64px;
+      background: linear-gradient(135deg, var(--accent), #ff3333);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: var(--font);
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 24px rgba(204,0,0,0.3);
+    }
+    .btn-start-game:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(204,0,0,0.4);
+    }
+
+    /* ═══════════════════════════════════════
+       GAME PANEL (R1, R2, R4)
+       ═══════════════════════════════════════ */
+    .game-layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      height: calc(100vh - 56px);
+      overflow: hidden;
+    }
+
+    /* ── LEFT: Question Area ── */
+    .q-area {
+      display: flex;
+      flex-direction: column;
+      padding: 32px 48px;
+      overflow-y: auto;
+      position: relative;
+    }
+    .q-area::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+      opacity: 0.04;
+      pointer-events: none;
+    }
+
+    .q-round-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .q-round-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .q-text-main {
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 32px;
+      max-width: 800px;
+      animation: q-slide-in 0.4s ease-out;
+    }
+    @keyframes q-slide-in {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* MCQ grid — TV size */
+    .host-mcq-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      max-width: 800px;
+      animation: q-slide-in 0.5s ease-out;
+    }
+    .host-opt-btn {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      font-size: 18px;
+      font-family: var(--font);
+      color: #ccc;
+      cursor: default;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.3s;
+      text-align: left;
+      line-height: 1.5;
     }
     .host-opt-btn .opt-letter {
-      width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,0.1);
-      display:flex; align-items:center; justify-content:center;
-      font-weight:700; font-size:13px; flex-shrink:0;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      flex-shrink: 0;
+      transition: all 0.3s;
     }
     .host-opt-btn.revealed-correct {
-      background:rgba(76,175,80,0.25); border-color:#4caf50;
+      background: rgba(76,175,80,0.15);
+      border-color: var(--green);
+      color: #fff;
+      box-shadow: 0 0 24px rgba(76,175,80,0.15);
     }
-    .host-opt-btn.revealed-correct .opt-letter { background:#4caf50; }
+    .host-opt-btn.revealed-correct .opt-letter {
+      background: var(--green);
+    }
 
-    /* Fill-in host display */
+    /* Fill-in display */
     .host-fillin-display {
-      background:#111; border:2px solid rgba(255,255,255,0.1);
-      border-radius:10px; padding:16px; font-size:15px; color:#ccc;
-      line-height:1.8; margin-top:8px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 32px;
+      font-size: 22px;
+      color: #ccc;
+      line-height: 2;
+      max-width: 800px;
+      animation: q-slide-in 0.5s ease-out;
     }
     .host-fi-blank {
-      display:inline-block; min-width:120px; border-bottom:2px solid var(--accent,#cc0000);
-      margin:0 6px; text-align:center; color:transparent;
-      font-weight:700; font-size:15px; transition:all .4s;
+      display: inline-block;
+      min-width: 160px;
+      border-bottom: 3px solid var(--accent);
+      margin: 0 8px;
+      text-align: center;
+      color: transparent;
+      font-weight: 700;
+      font-size: 22px;
+      transition: all 0.4s;
     }
     .host-fi-blank.revealed {
-      color:#4caf50; border-color:#4caf50;
+      color: var(--green);
+      border-color: var(--green);
     }
 
-    /* ── Round 3 Battle View ── */
-    #host-round3-battle {
-      display:flex; flex-direction:column; gap:0; height:calc(100vh - 80px);
+    /* Answer progress bar */
+    .answer-progress {
+      margin-top: auto;
+      padding-top: 24px;
     }
-    .r3-battle-top {
-      padding:16px 20px 10px;
-      border-bottom:1px solid rgba(255,255,255,0.08);
+    .answer-progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
     }
-    .r3-battle-header {
-      display:flex; justify-content:space-between; align-items:center;
-      margin-bottom:12px;
+    .answer-progress-label {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      font-weight: 600;
     }
-    .r3-battle-title {
-      font-size:14px; font-weight:700; letter-spacing:2px;
-      color:#d4a017; text-transform:uppercase;
+    .answer-progress-count {
+      font-size: 18px;
+      font-weight: 800;
+      font-family: var(--mono);
     }
-    .r3-q-counter { font-size:12px; color:var(--muted,#888); }
-
-    /* Battle bar */
-    .r3-score-row {
-      display:flex; justify-content:space-between; align-items:center;
-      margin-bottom:6px;
+    .answer-progress-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
     }
-    .r3-score-pro { font-size:22px; font-weight:800; color:#4caf50; }
-    .r3-score-anti { font-size:22px; font-weight:800; color:#f44336; }
-    .r3-vs-label { font-size:13px; color:#d4a017; font-weight:700; }
-    .r3-influence-bar {
-      display:flex; height:18px; border-radius:9px; overflow:hidden;
-      background:#2a1f14; position:relative;
+    .answer-progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--accent), #ff6644);
+      transition: width 0.5s ease;
     }
-    .r3-inf-pro {
-      background:linear-gradient(90deg,#388e3c,#4caf50);
-      transition:width 0.6s cubic-bezier(.4,0,.2,1);
-      border-radius:9px 0 0 9px;
-    }
-    .r3-inf-anti {
-      background:linear-gradient(90deg,#f44336,#b71c1c);
-      transition:width 0.6s cubic-bezier(.4,0,.2,1);
-      border-radius:0 9px 9px 0;
-    }
-    .r3-pct-labels {
-      display:flex; justify-content:space-between;
-      font-size:11px; color:var(--muted,#888); margin-top:3px;
+    .answer-stats-text {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
     }
 
     /* Controls row */
-    .r3-controls {
-      display:flex; gap:10px; margin-top:10px; align-items:center;
+    .host-controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
     }
-    .r3-controls .btn-primary { flex:1; padding:10px; font-size:13px; }
-    .r3-controls .btn-secondary { flex:1; padding:10px; font-size:13px; }
+    .btn-primary {
+      flex: 1;
+      padding: 14px 28px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.4; cursor: default; transform: none; }
+    .btn-secondary {
+      padding: 14px 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { background: var(--surface-hover); }
+    .btn-secondary:disabled { opacity: 0.4; cursor: default; }
 
-    /* Answer stats */
-    .r3-answer-stats {
-      font-size:11px; color:var(--muted,#888);
-      background:rgba(255,255,255,0.04); border-radius:6px;
-      padding:6px 10px; margin-top:8px;
+    /* ── RIGHT: Leaderboard Sidebar ── */
+    .lb-sidebar {
+      background: rgba(255,255,255,0.02);
+      border-left: 1px solid var(--border);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
-
-    /* Members area */
-    .r3-members-area {
-      flex:1; display:flex; overflow:hidden;
+    .lb-header {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    .r3-team-col {
-      flex:1; padding:14px 16px; overflow-y:auto; display:flex;
-      flex-direction:column; gap:6px;
+    .lb-list {
+      list-style: none;
+      flex: 1;
+      overflow-y: auto;
     }
-    .r3-team-col.pro-col {
-      border-right:1px solid rgba(255,255,255,0.06);
-      background:rgba(76,175,80,0.04);
+    .lb-list li {
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      gap: 8px;
     }
-    .r3-team-col.anti-col {
-      background:rgba(244,67,54,0.04);
+    .lb-list li:last-child { border-bottom: none; }
+    .lb-rank {
+      width: 24px;
+      font-weight: 700;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 12px;
+      text-align: center;
     }
-    .r3-col-header {
-      display:flex; align-items:center; gap:8px; margin-bottom:8px;
-      padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08);
+    .lb-name { flex: 1; font-weight: 500; }
+    .lb-score {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 13px;
     }
-    .r3-col-header.pro { color:#4caf50; }
-    .r3-col-header.anti { color:#f44336; justify-content:flex-end; }
-    .r3-col-title { font-size:11px; font-weight:700; letter-spacing:1.5px; }
-    .r3-col-count { font-size:11px; background:rgba(255,255,255,0.1); border-radius:10px; padding:1px 7px; }
-
-    .r3-member-row {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:7px 10px; border-radius:8px; background:rgba(255,255,255,0.04);
-      transition:all .3s;
-    }
-    .r3-member-row.pro-row { border-left:3px solid #4caf50; }
-    .r3-member-row.anti-row { border-right:3px solid #f44336; flex-direction:row-reverse; }
-    .r3-member-name { font-size:13px; color:#ddd; font-weight:500; }
-    .r3-member-score { font-size:12px; font-weight:700; }
-    .pro-row .r3-member-score { color:#4caf50; }
-    .anti-row .r3-member-score { color:#f44336; }
-    .r3-member-rank {
-      font-size:11px; color:#888; min-width:16px; text-align:center;
-    }
-    .anti-row .r3-member-rank { text-align:right; }
-
-    /* Divider line */
-    .r3-divider {
-      width:2px; background:linear-gradient(to bottom, transparent, rgba(212,160,23,0.4), transparent);
-      flex-shrink:0;
-    }
-
-    /* Round 4 leaderboard (round4Score) */
     .r4-lb-badge {
-      font-size:10px; color:#e491b0; letter-spacing:1px; font-weight:600;
-      background:rgba(228,145,176,0.12); border-radius:4px; padding:2px 6px;
-      margin-left:6px;
+      font-size: 9px;
+      color: var(--pink);
+      letter-spacing: 1px;
+      font-weight: 600;
+      background: rgba(228,145,176,0.12);
+      border-radius: 4px;
+      padding: 2px 6px;
     }
 
-    /* ── Round 3 Countdown Timer ── */
+    /* ═══════════════════════════════════════
+       ROUND 3 BATTLE VIEW
+       ═══════════════════════════════════════ */
+    #host-round3-battle {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 56px);
+    }
+    .r3-battle-top {
+      padding: 20px 32px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .r3-battle-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .r3-battle-title {
+      font-size: 16px; font-weight: 800;
+      letter-spacing: 3px; color: var(--gold);
+    }
+    .r3-q-counter { font-size: 13px; color: var(--muted); }
+
+    .r3-score-row {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 10px;
+    }
+    .r3-score-team {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .r3-score-pro { font-size: 32px; font-weight: 900; color: var(--green); font-family: var(--mono); }
+    .r3-score-anti { font-size: 32px; font-weight: 900; color: var(--red); font-family: var(--mono); }
+    .r3-vs-label { font-size: 14px; color: var(--gold); font-weight: 800; letter-spacing: 3px; }
+    .r3-influence-bar {
+      display: flex; height: 20px; border-radius: 10px;
+      overflow: hidden; background: #2a1f14;
+    }
+    .r3-inf-pro {
+      background: linear-gradient(90deg, #388e3c, #4caf50);
+      transition: width 0.6s cubic-bezier(.4,0,.2,1);
+      border-radius: 10px 0 0 10px;
+    }
+    .r3-inf-anti {
+      background: linear-gradient(90deg, #f44336, #b71c1c);
+      transition: width 0.6s cubic-bezier(.4,0,.2,1);
+      border-radius: 0 10px 10px 0;
+    }
+    .r3-pct-labels {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: var(--muted); margin-top: 4px;
+    }
+
+    .r3-controls {
+      display: flex; gap: 12px; margin-top: 12px; align-items: center;
+    }
+    .r3-controls .btn-primary { flex: 1; }
+    .r3-controls .btn-secondary { flex: 1; }
+    .r3-answer-stats {
+      font-size: 12px; color: var(--muted);
+      background: var(--surface); border-radius: 8px;
+      padding: 8px 12px; margin-top: 10px;
+    }
+
+    /* Countdown */
     .r3-countdown-wrap {
-      display:flex; align-items:center; gap:10px;
-      background:rgba(255,255,255,0.06); border-radius:10px;
-      padding:8px 16px; margin-top:10px; justify-content:center;
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface); border-radius: 12px;
+      padding: 10px 20px; margin-top: 12px; justify-content: center;
     }
     .r3-countdown-label {
-      font-size:11px; color:#888; letter-spacing:1.5px; font-weight:600;
-      text-transform:uppercase;
+      font-size: 12px; color: var(--muted);
+      letter-spacing: 2px; font-weight: 600;
     }
     .r3-countdown-time {
-      font-size:28px; font-weight:800; font-family:var(--mono,monospace);
-      color:#d4a017; letter-spacing:2px; min-width:70px; text-align:center;
-      transition:color 0.3s;
+      font-size: 32px; font-weight: 900;
+      font-family: var(--mono); color: var(--gold);
+      letter-spacing: 3px; min-width: 80px; text-align: center;
     }
-    .r3-countdown-time.warning { color:#f44336; animation:pulse-warn 0.5s infinite alternate; }
+    .r3-countdown-time.warning {
+      color: var(--red);
+      animation: pulse-warn 0.5s infinite alternate;
+    }
     @keyframes pulse-warn { from{opacity:1} to{opacity:0.5} }
 
-    /* ── Daddy Reveal Screen ── */
+    /* Members area */
+    .r3-members-area { flex: 1; display: flex; overflow: hidden; }
+    .r3-team-col {
+      flex: 1; padding: 16px 20px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .r3-team-col.pro-col {
+      border-right: 1px solid var(--border);
+      background: rgba(76,175,80,0.03);
+    }
+    .r3-team-col.anti-col { background: rgba(244,67,54,0.03); }
+    .r3-col-header {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 10px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .r3-col-header.pro { color: var(--green); }
+    .r3-col-header.anti { color: var(--red); justify-content: flex-end; }
+    .r3-col-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; }
+    .r3-col-count {
+      font-size: 11px; background: rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 2px 8px;
+    }
+    .r3-member-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; border-radius: 8px; background: var(--surface);
+      transition: all 0.3s;
+    }
+    .r3-member-row.pro-row { border-left: 3px solid var(--green); }
+    .r3-member-row.anti-row { border-right: 3px solid var(--red); flex-direction: row-reverse; }
+    .r3-member-name { font-size: 14px; color: #ddd; font-weight: 500; }
+    .r3-member-score { font-size: 13px; font-weight: 700; }
+    .pro-row .r3-member-score { color: var(--green); }
+    .anti-row .r3-member-score { color: var(--red); }
+    .r3-member-rank { font-size: 12px; color: #888; min-width: 18px; text-align: center; }
+    .anti-row .r3-member-rank { text-align: right; }
+    .r3-member-status { font-size: 14px; }
+    .r3-divider {
+      width: 2px;
+      background: linear-gradient(to bottom, transparent, rgba(212,160,23,0.4), transparent);
+      flex-shrink: 0;
+    }
+
+    /* ═══════════════════════════════════════
+       DADDY REVEAL
+       ═══════════════════════════════════════ */
     #host-daddy-reveal {
-      position:fixed; inset:0; z-index:9999;
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      background:#000; text-align:center;
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: #000; text-align: center;
     }
     .daddy-reveal-img {
-      max-width:min(90vw, 600px); max-height:70vh;
-      object-fit:contain; border-radius:16px;
-      box-shadow:0 0 60px rgba(255,255,255,0.2);
-      animation:daddy-zoom .5s cubic-bezier(.34,1.56,.64,1) forwards;
+      max-width: min(90vw, 700px);
+      max-height: 65vh;
+      object-fit: contain;
+      border-radius: 20px;
+      box-shadow: 0 0 80px rgba(255,255,255,0.15);
+      animation: daddy-zoom 0.6s cubic-bezier(.34,1.56,.64,1) forwards;
     }
     @keyframes daddy-zoom {
-      from { transform:scale(0.5); opacity:0; }
-      to   { transform:scale(1);   opacity:1; }
+      from { transform: scale(0.4); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
     }
     .daddy-reveal-title {
-      font-size:32px; font-weight:800; letter-spacing:4px;
-      margin-top:24px; text-transform:uppercase;
+      font-size: 42px; font-weight: 900;
+      letter-spacing: 5px; margin-top: 28px;
+      text-transform: uppercase;
     }
     .daddy-reveal-sub {
-      font-size:14px; color:#888; margin-top:8px;
+      font-size: 16px; color: #888; margin-top: 10px;
     }
     .daddy-reveal-btn {
-      margin-top:28px; padding:14px 40px;
-      background:#d4a017; color:#000; font-weight:800;
-      font-size:14px; letter-spacing:2px; border:none;
-      border-radius:10px; cursor:pointer;
-      transition:all .2s;
+      margin-top: 32px; padding: 16px 48px;
+      background: var(--gold); color: #000;
+      font-weight: 800; font-size: 15px;
+      letter-spacing: 2px; border: none;
+      border-radius: 12px; cursor: pointer;
+      transition: all 0.2s;
     }
-    .daddy-reveal-btn:hover { background:#f5b800; transform:scale(1.05); }
+    .daddy-reveal-btn:hover { background: #f5b800; transform: scale(1.05); }
+
+    /* ═══════════════════════════════════════
+       TEAM SELECTION & RESULTS
+       ═══════════════════════════════════════ */
+    .team-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: calc(100vh - 56px);
+      text-align: center;
+      gap: 24px;
+      padding: 40px;
+    }
+    .team-screen h2 {
+      font-size: 28px; font-weight: 800;
+      letter-spacing: 3px; color: var(--gold);
+    }
+
+    /* ═══════════════════════════════════════
+       FUN FACT
+       ═══════════════════════════════════════ */
+    .host-funfact-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: calc(100vh - 56px);
+      text-align: center;
+      gap: 24px;
+      padding: 60px;
+    }
+    .host-funfact-panel h2 {
+      font-size: 18px;
+      color: var(--accent);
+      letter-spacing: 3px;
+    }
+    .host-funfact-panel .funfact-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #fff;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 28px;
+      text-transform: uppercase;
+    }
+    .host-funfact-panel .funfact-text-container {
+      background: rgba(26, 26, 36, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 32px;
+      min-height: 180px;
+      width: 100%;
+      max-width: 700px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .host-funfact-panel .funfact-text {
+      font-size: 22px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.8);
+      margin: 0;
+    }
+
+    /* ═══════════════════════════════════════
+       FINAL RESULTS
+       ═══════════════════════════════════════ */
+    .host-final {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: calc(100vh - 56px);
+      text-align: center;
+      padding: 40px;
+      gap: 20px;
+    }
+    .host-final h2 {
+      font-size: 28px;
+      letter-spacing: 4px;
+      margin-bottom: 20px;
+    }
+    .podium {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .podium-place {
+      text-align: center;
+      padding: 20px 24px;
+      border-radius: 16px 16px 0 0;
+      animation: slide-up 0.6s ease-out;
+    }
+    @keyframes slide-up {
+      from { transform: translateY(40px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    .podium-place.first {
+      background: linear-gradient(180deg, rgba(255,215,0,0.15) 0%, rgba(255,215,0,0.05) 100%);
+      border: 1px solid rgba(255,215,0,0.2);
+      min-height: 200px; min-width: 180px;
+    }
+    .podium-place.second {
+      background: linear-gradient(180deg, rgba(192,192,192,0.1) 0%, rgba(192,192,192,0.03) 100%);
+      border: 1px solid rgba(192,192,192,0.15);
+      min-height: 160px; min-width: 150px;
+    }
+    .podium-place.third {
+      background: linear-gradient(180deg, rgba(205,127,50,0.1) 0%, rgba(205,127,50,0.03) 100%);
+      border: 1px solid rgba(205,127,50,0.15);
+      min-height: 120px; min-width: 150px;
+    }
+    .podium-num { font-size: 36px; font-weight: 800; margin-bottom: 8px; }
+    .podium-name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .podium-score { font-size: 14px; font-family: var(--mono); color: var(--muted); }
+    .host-full-ranking { max-width: 600px; width: 100%; }
+    .host-full-ranking table {
+      width: 100%; border-collapse: collapse; font-size: 15px;
+    }
+    .host-full-ranking th {
+      font-size: 11px; letter-spacing: 2px; color: var(--muted);
+      text-align: left; padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .host-full-ranking td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .host-full-ranking tr:hover td { background: rgba(255,255,255,0.02); }
+    .host-class-stats {
+      display: flex; justify-content: center; gap: 40px;
+      margin-top: 24px; font-size: 13px; color: var(--muted);
+    }
+    .host-class-stats .cs-val {
+      display: block; font-size: 18px; font-weight: 700;
+      color: var(--text); margin-bottom: 2px;
+    }
+
+    /* ═══════════════════════════════════════
+       MUSIC PLAYER WIDGET
+       ═══════════════════════════════════════ */
+    #music-player-widget {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9998;
+      background: rgba(10, 10, 18, 0.92);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 220px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      user-select: none;
+    }
+    #music-player-widget:hover {
+      border-color: rgba(255,255,255,0.2);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08);
+    }
+    .mp-icon {
+      font-size: 22px;
+      animation: mp-spin 8s linear infinite;
+      animation-play-state: paused;
+      flex-shrink: 0;
+    }
+    .mp-icon.playing { animation-play-state: running; }
+    @keyframes mp-spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    .mp-info {
+      flex: 1;
+      overflow: hidden;
+    }
+    .mp-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .mp-track {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mp-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .mp-btn:hover {
+      background: rgba(255,255,255,0.18);
+      transform: scale(1.08);
+    }
+    .mp-btn:active { transform: scale(0.95); }
+    .mp-eq {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    .mp-eq-bar {
+      width: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      animation: eq-bounce 0.6s ease infinite alternate;
+    }
+    .mp-eq-bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+    .mp-eq-bar:nth-child(2) { height: 14px; animation-delay: 0.15s; }
+    .mp-eq-bar:nth-child(3) { height: 10px; animation-delay: 0.3s; }
+    .mp-eq.paused .mp-eq-bar { animation-play-state: paused; }
+    @keyframes eq-bounce {
+      from { height: 4px; }
+      to   { height: 16px; }
+    }
   </style>
 </head>
 <body>
 
-<div class="host-container">
-  <!-- Header -->
-  <div class="host-header">
-    <h1>🌐 GLOBAL AGENT MISSION</h1>
-    <div class="host-status">
+<!-- ═══ HEADER BAR ═══ -->
+<div class="host-bar">
+  <h1><span class="hb-globe">🌐</span> GLOBAL AGENT MISSION</h1>
+  <div class="host-status-area">
+    <span class="host-round-badge" id="host-round-badge">—</span>
+    <div class="status-pill">
       <span class="status-dot" id="host-status-dot"></span>
       <span id="host-status-text">WAITING</span>
     </div>
   </div>
+</div>
 
-  <!-- ═══ LOBBY ═══ -->
-  <div id="host-lobby" class="host-lobby">
-    <h2>Mission Control</h2>
-    <p class="player-count"><span id="player-count">0</span> agents connected</p>
-    <div class="host-player-grid" id="host-player-grid"></div>
-    <button class="btn-primary" id="host-start-btn" onclick="hostStartGame()">START MISSION</button>
-  </div>
+<!-- ═══ LOBBY ═══ -->
+<div id="host-lobby" class="host-lobby">
+  <div class="lobby-icon">🌐</div>
+  <div class="lobby-title">MISSION CONTROL</div>
+  <div class="lobby-count" id="player-count">0</div>
+  <div class="lobby-count-label">AGENTS CONNECTED</div>
+  <div class="player-grid" id="host-player-grid"></div>
+  <button class="btn-start-game" id="host-start-btn" onclick="hostStartGame()">▶ START MISSION</button>
+</div>
 
-  <!-- ═══ GAME PANEL (Round 1, 2, 4) ═══ -->
-  <div id="host-game" class="hidden">
-    <div class="host-game-panel">
-      <!-- Left: Question display (like player, no answer shown) -->
-      <div class="host-q-panel">
-        <h3 id="host-q-round-badge">CURRENT QUESTION</h3>
-        <p style="font-size:10px;color:var(--muted);margin-bottom:8px" id="host-q-meta"></p>
-        <p class="host-q-text" id="host-q-text"></p>
+<!-- ═══ GAME PANEL (Round 1, 2, 4) ═══ -->
+<div id="host-game" class="hidden">
+  <div class="game-layout">
+    <!-- Left: Question Area -->
+    <div class="q-area">
+      <div class="q-round-tag">
+        <span class="q-round-dot"></span>
+        <span id="host-q-meta"></span>
+      </div>
+      <div class="q-text-main" id="host-q-text"></div>
+      <div id="host-q-display"></div>
 
-        <!-- MCQ options (host view) -->
-        <div class="host-q-display" id="host-q-display"></div>
-
-        <!-- Stats -->
-        <div class="host-q-stats" id="host-q-stats" style="margin-top:10px"></div>
-
-        <!-- Controls -->
-        <div class="host-controls" style="margin-top:16px">
-          <button class="btn-primary" id="host-next-btn" onclick="hostNextQuestion()">NEXT QUESTION →</button>
-          <button class="btn-secondary" id="host-reveal-btn" onclick="hostRevealAnswer()">REVEAL ANSWER</button>
+      <!-- Answer Progress -->
+      <div class="answer-progress">
+        <div class="answer-progress-header">
+          <span class="answer-progress-label">ANSWERS RECEIVED</span>
+          <span class="answer-progress-count"><span id="answer-count">0</span> / <span id="answer-total">0</span></span>
         </div>
-      </div>
-      <!-- Right: Leaderboard -->
-      <div class="host-lb-panel">
-        <h3>LIVE LEADERBOARD <span id="host-lb-badge" class="r4-lb-badge hidden">ROUND 4</span></h3>
-        <ol class="host-lb-list" id="host-lb-list"></ol>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ ROUND 3 BATTLE VIEW ═══ -->
-  <div id="host-round3-battle" class="hidden">
-    <!-- Top: Battle bar + controls -->
-    <div class="r3-battle-top">
-      <div class="r3-battle-header">
-        <div class="r3-battle-title">⚖️ GLOBALIZATION DEBATE — LIVE BATTLE</div>
-        <div class="r3-q-counter" id="r3-q-counter">Question 0 / 10</div>
-      </div>
-
-      <!-- 3-minute countdown -->
-      <div class="r3-countdown-wrap">
-        <span class="r3-countdown-label">⏱ Time Remaining</span>
-        <span class="r3-countdown-time" id="r3-countdown">3:00</span>
-        <span class="r3-countdown-label">ends automatically</span>
-      </div>
-
-      <!-- Score row -->
-      <div class="r3-score-row">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:24px">🌐</span>
-          <div>
-            <div style="font-size:11px;color:#4caf50;font-weight:600;letter-spacing:1px">PRO</div>
-            <div class="r3-score-pro" id="r3-pro-score">0</div>
-          </div>
+        <div class="answer-progress-bar">
+          <div class="answer-progress-fill" id="answer-progress-fill" style="width:0%"></div>
         </div>
-        <div class="r3-vs-label">VS</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="text-align:right">
-            <div style="font-size:11px;color:#f44336;font-weight:600;letter-spacing:1px">ANTI</div>
-            <div class="r3-score-anti" id="r3-anti-score">0</div>
-          </div>
-          <span style="font-size:24px">🛡️</span>
-        </div>
+        <div class="answer-stats-text" id="host-q-stats"></div>
       </div>
 
-      <!-- Influence bar -->
-      <div class="r3-influence-bar">
-        <div class="r3-inf-pro" id="r3-inf-pro" style="width:50%"></div>
-        <div class="r3-inf-anti" id="r3-inf-anti" style="width:50%"></div>
-      </div>
-      <div class="r3-pct-labels">
-        <span id="r3-pro-pct">50%</span>
-        <span>— INFLUENCE —</span>
-        <span id="r3-anti-pct">50%</span>
-      </div>
-
-      <!-- Answer stats + controls -->
-      <div class="r3-answer-stats" id="r3-answer-stats">Waiting for answers...</div>
-      <div class="r3-controls">
-        <button class="btn-primary" id="r3-next-btn" onclick="hostNextQuestion()">NEXT QUESTION →</button>
-        <button class="btn-secondary" id="r3-reveal-btn" onclick="hostRevealAnswer()">REVEAL ANSWER</button>
+      <!-- Controls -->
+      <div class="host-controls">
+        <button class="btn-primary" id="host-next-btn" onclick="hostNextQuestion()">NEXT QUESTION →</button>
+        <button class="btn-secondary" id="host-reveal-btn" onclick="hostRevealAnswer()">REVEAL ANSWER</button>
       </div>
     </div>
 
-    <!-- Bottom: Member lists -->
-    <div class="r3-members-area">
-      <!-- PRO team (left) -->
-      <div class="r3-team-col pro-col" id="r3-pro-members">
-        <div class="r3-col-header pro">
-          <span style="font-size:18px">🌐</span>
-          <span class="r3-col-title">PRO GLOBALIZATION</span>
-          <span class="r3-col-count" id="r3-pro-count">0</span>
-        </div>
-        <!-- members populated by JS -->
+    <!-- Right: Leaderboard -->
+    <div class="lb-sidebar">
+      <div class="lb-header">
+        <span>LEADERBOARD</span>
+        <span id="host-lb-badge" class="r4-lb-badge hidden">ROUND 4</span>
       </div>
-      <div class="r3-divider"></div>
-      <!-- ANTI team (right) -->
-      <div class="r3-team-col anti-col" id="r3-anti-members">
-        <div class="r3-col-header anti">
-          <span class="r3-col-count" id="r3-anti-count">0</span>
-          <span class="r3-col-title">ANTI GLOBALIZATION</span>
-          <span style="font-size:18px">🛡️</span>
-        </div>
-        <!-- members populated by JS -->
-      </div>
+      <ol class="lb-list" id="host-lb-list"></ol>
     </div>
-  </div>
-
-  <!-- ═══ TEAM SELECTION (Round 3) ═══ -->
-  <div id="host-team-selection" class="hidden" style="text-align:center;padding:40px 20px">
-    <h2 style="color:#d4a017;letter-spacing:2px;margin-bottom:8px">⚖️ TEAM SELECTION</h2>
-    <p style="color:var(--muted);margin-bottom:24px">Players are choosing their teams for the Globalization Debate</p>
-    <div style="display:flex;justify-content:center;gap:40px;margin-bottom:24px">
-      <div style="text-align:center">
-        <div style="font-size:48px">🌐</div>
-        <div style="color:#4caf50;font-size:14px;font-weight:600;letter-spacing:1px">PRO</div>
-        <div style="font-size:36px;font-weight:700;color:#4caf50" id="host-pro-count">0</div>
-        <div style="color:var(--muted);font-size:12px">agents</div>
-      </div>
-      <div style="display:flex;align-items:center;color:#d4a017;font-size:20px;font-weight:700">VS</div>
-      <div style="text-align:center">
-        <div style="font-size:48px">🛡️</div>
-        <div style="color:#f44336;font-size:14px;font-weight:600;letter-spacing:1px">ANTI</div>
-        <div style="font-size:36px;font-weight:700;color:#f44336" id="host-anti-count">0</div>
-        <div style="color:var(--muted);font-size:12px">agents</div>
-      </div>
-    </div>
-    <button class="btn-primary" onclick="hostStartRound3()" style="background:#d4a017">START ROUND 3 →</button>
-  </div>
-
-  <!-- ═══ TEAM RESULTS (after Round 3) ═══ -->
-  <div id="host-team-results" class="hidden" style="text-align:center;padding:40px 20px">
-    <h2 style="color:#d4a017;letter-spacing:2px;margin-bottom:8px">🏆 DEBATE RESULTS</h2>
-    <p style="color:var(--muted);margin-bottom:24px" id="host-tr-subtitle"></p>
-    <div style="display:flex;justify-content:center;gap:40px;margin-bottom:16px">
-      <div style="text-align:center">
-        <div style="font-size:48px">🌐</div>
-        <div style="color:#4caf50;font-size:14px;font-weight:600">PRO</div>
-        <div style="font-size:36px;font-weight:700;color:#4caf50" id="host-tr-pro-score">0</div>
-        <div style="color:var(--muted);font-size:12px" id="host-tr-pro-members">0 agents</div>
-      </div>
-      <div style="display:flex;align-items:center;color:#d4a017;font-size:20px;font-weight:700">VS</div>
-      <div style="text-align:center">
-        <div style="font-size:48px">🛡️</div>
-        <div style="color:#f44336;font-size:14px;font-weight:600">ANTI</div>
-        <div style="font-size:36px;font-weight:700;color:#f44336" id="host-tr-anti-score">0</div>
-        <div style="color:var(--muted);font-size:12px" id="host-tr-anti-members">0 agents</div>
-      </div>
-    </div>
-    <div style="max-width:400px;margin:0 auto 24px">
-      <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;background:#2a1f14">
-        <div id="host-tr-inf-pro" style="background:#4caf50;width:50%;transition:width 0.6s;border-radius:6px 0 0 6px"></div>
-        <div id="host-tr-inf-anti" style="background:#f44336;width:50%;transition:width 0.6s;border-radius:0 6px 6px 0"></div>
-      </div>
-    </div>
-    <p style="color:var(--muted);font-size:13px;margin-bottom:20px">🎁 Phát thưởng cho team thắng xong thì bấm tiếp tục</p>
-    <button class="btn-primary" onclick="hostContinueAfterTeam()" style="background:#d4a017">CONTINUE TO ROUND 4 →</button>
-  </div>
-
-  <!-- ═══ DADDY REVEAL (Win/Lose reaction image) ═══ -->
-  <div id="host-daddy-reveal" class="hidden">
-    <img id="daddy-reveal-img" src="" alt="Result" class="daddy-reveal-img">
-    <div class="daddy-reveal-title" id="daddy-reveal-title"></div>
-    <div class="daddy-reveal-sub" id="daddy-reveal-sub">Results will appear in a moment...</div>
-    <button class="daddy-reveal-btn" onclick="hostShowTeamResults()">VIEW FULL RESULTS →</button>
-  </div>
-
-  <!-- ═══ FUN FACT ═══ -->
-  <div id="host-funfact" class="host-funfact-panel hidden">
-    <h2>💡 DID YOU KNOW?</h2>
-    <p class="funfact-title" id="host-funfact-title"></p>
-    <p class="funfact-text" id="host-funfact-text"></p>
-    <button class="btn-primary" onclick="hostNextRound()">CONTINUE TO NEXT ROUND →</button>
-  </div>
-
-  <!-- ═══ FINAL ═══ -->
-  <div id="host-final" class="host-final hidden">
-    <h2>🏆 MISSION COMPLETE</h2>
-    <div class="podium" id="host-podium"></div>
-    <div class="host-full-ranking" id="host-ranking"></div>
-    <div class="host-class-stats" id="host-class-stats"></div>
   </div>
 </div>
+
+<!-- ═══ ROUND 3 BATTLE VIEW ═══ -->
+<div id="host-round3-battle" class="hidden">
+  <div class="r3-battle-top">
+    <div class="r3-battle-header">
+      <span class="r3-battle-title">⚖️ ROUND 3 · DEBATE ARENA</span>
+      <span class="r3-q-counter" id="r3-q-counter">Agents answering independently</span>
+    </div>
+
+    <div class="r3-score-row">
+      <div class="r3-score-team">
+        <span style="font-size:28px">🌐</span>
+        <div>
+          <div style="font-size:12px;color:var(--green);font-weight:700;letter-spacing:1px">PRO · <span id="r3-pro-count">0</span></div>
+          <div class="r3-score-pro" id="r3-pro-score">0</div>
+        </div>
+      </div>
+      <span class="r3-vs-label">VS</span>
+      <div class="r3-score-team" style="text-align:right">
+        <div>
+          <div style="font-size:12px;color:var(--red);font-weight:700;letter-spacing:1px"><span id="r3-anti-count">0</span> · ANTI</div>
+          <div class="r3-score-anti" id="r3-anti-score">0</div>
+        </div>
+        <span style="font-size:28px">🛡️</span>
+      </div>
+    </div>
+
+    <div class="r3-influence-bar">
+      <div class="r3-inf-pro" id="r3-inf-pro" style="width:50%"></div>
+      <div class="r3-inf-anti" id="r3-inf-anti" style="width:50%"></div>
+    </div>
+    <div class="r3-pct-labels">
+      <span id="r3-pro-pct">50%</span>
+      <span>— INFLUENCE —</span>
+      <span id="r3-anti-pct">50%</span>
+    </div>
+
+    <div class="r3-answer-stats" id="r3-answer-stats">Waiting for answers...</div>
+    <div class="r3-controls">
+      <button class="btn-primary" id="r3-next-btn" onclick="hostNextQuestion()">NEXT QUESTION →</button>
+      <button class="btn-secondary" id="r3-reveal-btn" onclick="hostRevealAnswer()">REVEAL ANSWER</button>
+      <button onclick="stopR3BattleUpdates(); showDaddyReveal();" style="background:var(--red);color:#fff;border:none;padding:12px 24px;border-radius:10px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .2s">⏹ END ROUND 3</button>
+    </div>
+    <div class="r3-countdown-wrap">
+      <span class="r3-countdown-label">TIME REMAINING</span>
+      <span class="r3-countdown-time" id="r3-countdown">3:00</span>
+    </div>
+  </div>
+
+  <div class="r3-members-area">
+    <div class="r3-team-col pro-col" id="r3-pro-members">
+      <div class="r3-col-header pro">
+        <span class="r3-col-title">🌐 PRO GLOBALIZATION</span>
+      </div>
+    </div>
+    <div class="r3-divider"></div>
+    <div class="r3-team-col anti-col" id="r3-anti-members">
+      <div class="r3-col-header anti">
+        <span class="r3-col-title">ANTI GLOBALIZATION 🛡️</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TEAM SELECTION ═══ -->
+<div id="host-team-selection" class="hidden team-screen">
+  <h2>⚖️ CHOOSE YOUR SIDE</h2>
+  <p style="color:var(--muted);font-size:16px;margin-bottom:16px">Players are selecting their teams...</p>
+  <div style="display:flex;justify-content:center;gap:60px;margin-bottom:32px">
+    <div style="text-align:center">
+      <div style="font-size:64px">🌐</div>
+      <div style="color:var(--green);font-size:16px;font-weight:700;letter-spacing:2px;margin-top:8px">PRO</div>
+      <div style="font-size:48px;font-weight:900;color:var(--green);font-family:var(--mono)" id="host-pro-count">0</div>
+      <div style="color:var(--muted);font-size:13px">agents</div>
+    </div>
+    <div style="display:flex;align-items:center;color:var(--gold);font-size:24px;font-weight:800;letter-spacing:4px">VS</div>
+    <div style="text-align:center">
+      <div style="font-size:64px">🛡️</div>
+      <div style="color:var(--red);font-size:16px;font-weight:700;letter-spacing:2px;margin-top:8px">ANTI</div>
+      <div style="font-size:48px;font-weight:900;color:var(--red);font-family:var(--mono)" id="host-anti-count">0</div>
+      <div style="color:var(--muted);font-size:13px">agents</div>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="hostStartRound3()" style="background:var(--gold);padding:16px 48px;font-size:16px">START ROUND 3 →</button>
+</div>
+
+<!-- ═══ TEAM RESULTS ═══ -->
+<div id="host-team-results" class="hidden team-screen">
+  <h2>🏆 DEBATE RESULTS</h2>
+  <p style="color:var(--muted);font-size:16px;margin-bottom:24px" id="host-tr-subtitle"></p>
+  <div style="display:flex;justify-content:center;gap:60px;margin-bottom:20px">
+    <div style="text-align:center">
+      <div style="font-size:56px">🌐</div>
+      <div style="color:var(--green);font-size:15px;font-weight:700">PRO</div>
+      <div style="font-size:44px;font-weight:900;color:var(--green);font-family:var(--mono)" id="host-tr-pro-score">0</div>
+      <div style="color:var(--muted);font-size:13px" id="host-tr-pro-members">0 agents</div>
+    </div>
+    <div style="display:flex;align-items:center;color:var(--gold);font-size:22px;font-weight:800">VS</div>
+    <div style="text-align:center">
+      <div style="font-size:56px">🛡️</div>
+      <div style="color:var(--red);font-size:15px;font-weight:700">ANTI</div>
+      <div style="font-size:44px;font-weight:900;color:var(--red);font-family:var(--mono)" id="host-tr-anti-score">0</div>
+      <div style="color:var(--muted);font-size:13px" id="host-tr-anti-members">0 agents</div>
+    </div>
+  </div>
+  <div style="max-width:500px;margin:0 auto 24px;width:100%">
+    <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;background:#2a1f14">
+      <div id="host-tr-inf-pro" style="background:var(--green);width:50%;transition:width 0.6s;border-radius:7px 0 0 7px"></div>
+      <div id="host-tr-inf-anti" style="background:var(--red);width:50%;transition:width 0.6s;border-radius:0 7px 7px 0"></div>
+    </div>
+  </div>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:20px">🎁 Phát thưởng cho team thắng xong thì bấm tiếp tục</p>
+  <button class="btn-primary" onclick="hostContinueAfterTeam()" style="background:var(--gold);padding:12px 24px;font-size:14px">CONTINUE TO ROUND 4 →</button>
+</div>
+
+<!-- ═══ DADDY REVEAL ═══ -->
+<div id="host-daddy-reveal" class="hidden">
+  <img id="daddy-reveal-img" src="" alt="Result" class="daddy-reveal-img">
+  <div class="daddy-reveal-title" id="daddy-reveal-title"></div>
+  <div class="daddy-reveal-sub" id="daddy-reveal-sub">Results will appear in a moment...</div>
+  <button class="daddy-reveal-btn" onclick="hostShowTeamResults()">VIEW FULL RESULTS →</button>
+</div>
+
+<!-- ═══ FUN FACT ═══ -->
+<div id="host-funfact" class="host-funfact-panel hidden">
+  <h2>💡 DID YOU KNOW?</h2>
+  <p class="funfact-title" id="host-funfact-title"></p>
+  <div class="funfact-text-container">
+    <p class="funfact-text" id="host-funfact-text"></p>
+  </div>
+  <button class="btn-primary" onclick="hostNextRound()" style="padding:12px 24px;font-size:14px">CONTINUE TO NEXT ROUND →</button>
+</div>
+
+<!-- ═══ FINAL ═══ -->
+<div id="host-final" class="host-final hidden">
+  <h2>🏆 MISSION COMPLETE</h2>
+  <div class="podium" id="host-podium"></div>
+  <div class="host-full-ranking" id="host-ranking"></div>
+  <div class="host-class-stats" id="host-class-stats"></div>
+</div>
+
+<!-- ═══ MUSIC PLAYER WIDGET ═══ -->
+<div id="music-player-widget">
+  <div class="mp-icon" id="mp-icon">🎵</div>
+  <div class="mp-info">
+    <div class="mp-title">NOW PLAYING</div>
+    <div class="mp-track" id="mp-track">No music loaded</div>
+  </div>
+  <div class="mp-eq" id="mp-eq">
+    <div class="mp-eq-bar"></div>
+    <div class="mp-eq-bar"></div>
+    <div class="mp-eq-bar"></div>
+  </div>
+  <button class="mp-btn" id="mp-play-btn" onclick="toggleMusic()" title="Play / Pause">▶</button>
+</div>
+
+<!-- hidden audio element -->
+<audio id="bg-music" loop preload="auto"></audio>
 
 <!-- Scripts -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script src="firebase-config.js"></script>
 <script src="questions.js"></script>
 <script src="host.js"></script>
